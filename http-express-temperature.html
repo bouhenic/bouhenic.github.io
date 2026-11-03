@@ -1,0 +1,369 @@
+
+<h2 class="sr-only">Animation pédagogique API REST Express/MySQL — BTS CIEL — simulation pas à pas</h2>
+<style>
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes arrowPulse{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes stepGlow{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 3px currentColor}}
+.panel{animation:fadeIn .2s ease}
+.mth{display:inline-flex;align-items:center;padding:5px 13px;border-radius:6px;font-family:var(--font-mono);font-size:12.5px;font-weight:500;cursor:pointer;border:1.5px solid;transition:all .15s;margin:2px}
+.mth:hover{opacity:.82}
+.mth.sel{box-shadow:0 0 0 3px currentColor}
+.cb{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 13px;font-family:var(--font-mono);font-size:12px;line-height:1.7;overflow-x:auto;white-space:pre}
+.nav-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;padding:0;transition:all .2s}
+.nav-dot.on{background:var(--color-text-primary);border-color:var(--color-text-primary)}
+.sbox{border:1.5px solid var(--color-border-tertiary);border-radius:10px;padding:10px;background:var(--color-background-secondary);transition:all .35s;flex:1;min-width:0;position:relative}
+.sbox.lit{animation:stepGlow .6s ease infinite}
+.sarr{font-size:20px;color:var(--color-text-tertiary);flex-shrink:0;align-self:center;transition:color .35s}
+.sarr.lit{animation:arrowPulse .6s ease-in-out infinite}
+.req-prop{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);margin:4px 0;cursor:pointer;transition:all .18s}
+.req-prop:hover{border-color:var(--color-border-info)}
+.req-prop.sel-rp{background:var(--color-background-info);border-color:var(--color-border-info);color:var(--color-text-info)}
+.sql-badge{display:inline-block;font-family:var(--font-mono);font-size:11px;padding:2px 8px;border-radius:4px;border:0.5px solid;font-weight:500}
+.tbl{border-collapse:collapse;width:100%;font-family:var(--font-mono);font-size:12px}
+.tbl th,.tbl td{border:0.5px solid var(--color-border-tertiary);padding:4px 10px;text-align:center}
+.tbl th{background:var(--color-background-secondary);font-weight:500}
+.spd{font-size:11px;padding:3px 9px;cursor:pointer;border:0.5px solid var(--color-border-secondary);border-radius:5px;background:transparent;color:var(--color-text-secondary);transition:all .15s}
+.spd.on{background:var(--color-background-secondary);border-color:var(--color-border-primary);color:var(--color-text-primary);font-weight:500}
+</style>
+
+<div style="padding:4px 0 12px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:11px;border-bottom:0.5px solid var(--color-border-tertiary)">
+  <span id="slbl" style="font-size:13px;font-weight:500;flex:1;color:var(--color-text-secondary)"></span>
+  <div id="dots" style="display:flex;gap:5px"></div>
+</div>
+<h3 id="sttl" style="font-size:17px;font-weight:500;margin:0 0 12px;color:var(--color-text-primary)"></h3>
+<div id="sbody" style="min-height:340px"></div>
+<div id="sdesc" style="margin-top:11px;font-size:13.5px;color:var(--color-text-secondary);line-height:1.75;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 14px"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:13px">
+  <button id="bprev" onclick="nav(-1)">← Précédent</button>
+  <span id="snb" style="font-size:12px;color:var(--color-text-tertiary)"></span>
+  <button id="bnext" onclick="nav(1)">Suivant →</button>
+</div>
+</div>
+
+<script>
+const C={G:{bg:'var(--color-background-info)',bd:'var(--color-border-info)',tx:'var(--color-text-info)'},P:{bg:'var(--color-background-success)',bd:'var(--color-border-success)',tx:'var(--color-text-success)'},U:{bg:'var(--color-background-warning)',bd:'var(--color-border-warning)',tx:'var(--color-text-warning)'},D:{bg:'var(--color-background-danger)',bd:'var(--color-border-danger)',tx:'var(--color-text-danger)'}};
+
+let cur=0, selRp=0, ovMth='GET';
+window._simSpeed=900;
+window._simT=null;
+
+const STEPS=[
+  {title:"Architecture : Client HTTP → Express → MySQL",desc:"L'architecture 3-tiers : le Client HTTP envoie une requête, Express la route vers le bon handler, qui exécute une requête SQL sur la base METEO et renvoie le résultat en JSON."},
+  {title:"L'objet req — req.query, req.params, req.body",desc:"Express expose toutes les données de la requête dans l'objet req. req.query contient les paramètres après le ?, req.params les segments dynamiques (:ID), req.body le JSON du corps (nécessite bodyParser.json())."},
+  {title:"GET /temperature — Lire des données",desc:"La route GET interroge la table TEMPERATURE. Sans paramètre : SELECT * retourne tout. Avec ?ID=5 : req.query.ID filtre les résultats. Simulez pas à pas pour voir chaque phase."},
+  {title:"POST /temperature — Insérer une donnée",desc:"La route POST reçoit la nouvelle valeur dans req.body.TEMP, parsé par bodyParser.json(). Elle exécute un INSERT et répond avec un message de succès JSON."},
+  {title:"PUT /temperature/:ID — Modifier une donnée",desc:"La route PUT combine req.params.ID (depuis l'URL /temperature/12) et req.body.TEMP (depuis le corps JSON). Elle exécute un UPDATE ciblé."},
+  {title:"DELETE /temperature/:ID — Supprimer une donnée",desc:"La route DELETE n'a besoin que de req.params.ID extrait de l'URL. Aucun corps requis. Elle exécute un DELETE ciblé et répond avec un message JSON."},
+];
+
+const MDATA={
+  GET:{c:'G',
+    phases:[
+      {label:'Requête HTTP',icon:'💻',
+       summary:'GET /temperature?ID=5',
+       detail:'Le client envoie une requête GET. Le symbole ? introduit les query parameters : ?ID=5 signifie qu\'on filtre par ID. Un GET n\'a pas de corps (body). L\'URL complète : http://localhost:3000/temperature?ID=5',
+       code:'GET /temperature?ID=5 HTTP/1.1\nHost: localhost:3000\n(pas de body dans un GET)'},
+      {label:'Handler Express',icon:'⚙️',
+       summary:'req.query.ID = "5"',
+       detail:'Express route vers app.get(\''/temperature\'\'). bodyParser.json() ne fait rien (pas de body). Express extrait automatiquement les query params :\n→ req.query       = { ID: "5" }\n→ req.query.ID    = "5"  (toujours une chaîne !)\n→ req.params      = {}   (pas de :ID dans la route GET)\n→ req.body        = undefined',
+       code:`app.get('/temperature', (req, res) => {\n  let sql = 'SELECT * FROM TEMPERATURE';\n  if (req.query.ID) {\n    // req.query.ID = "5" (string)\n    sql += \` WHERE ID=\${req.query.ID} LIMIT 1\`;\n  }\n  conn.query(sql, (err, results) => {\n    res.send(results);\n  });\n});`},
+      {label:'SQL → MySQL',icon:'🗄️',
+       summary:'SELECT … WHERE ID=5',
+       detail:'Le handler construit le SQL dynamiquement. Comme req.query.ID est défini, la clause WHERE est ajoutée. conn.query() envoie la requête à la base METEO.',
+       code:'-- SQL généré :\nSELECT * FROM TEMPERATURE\n  WHERE ID = 5 LIMIT 1\n\n-- Table TEMPERATURE :\n-- id=1 TEMP=25°C | id=5 TEMP=22°C | id=12 TEMP=18°C'},
+      {label:'Réponse JSON',icon:'📥',
+       summary:'200 OK → [{id:5,…}]',
+       detail:'MySQL retourne les résultats au callback. res.send(results) sérialise le tableau en JSON et le renvoie au client avec le status HTTP 200 OK. Express ferme automatiquement la connexion.',
+       code:'// res.send() envoie la réponse HTTP :\nHTTP/1.1 200 OK\nContent-Type: application/json\n\n[{"id":5,"TEMP":"22°C"}]'},
+    ]},
+  POST:{c:'P',
+    phases:[
+      {label:'Requête HTTP',icon:'💻',
+       summary:'POST + body {"TEMP":23}',
+       detail:'Le client envoie une requête POST avec un corps (body) JSON. Le header Content-Type: application/json indique à bodyParser.json() qu\'il doit parser ce corps. Sans ce header, req.body sera undefined.',
+       code:'POST /temperature HTTP/1.1\nHost: localhost:3000\nContent-Type: application/json\n\n{"TEMP": 23}'},
+      {label:'Handler Express',icon:'⚙️',
+       summary:'req.body.TEMP = 23',
+       detail:'bodyParser.json() parse le corps JSON → req.body = { TEMP: 23 }. Express route vers app.post(\'"/temperature\'"). Ici :\n→ req.body        = { TEMP: 23 }\n→ req.body.TEMP   = 23  (nombre, pas une chaîne)\n→ req.query       = {}\n→ req.params      = {}',
+       code:`app.post('/temperature', (req, res) => {\n  const newTemp = req.body.TEMP;  // = 23\n  const sql =\n    'INSERT INTO TEMPERATURE(TEMP) VALUES(?)';\n  conn.query(sql, [newTemp], (err, result) => {\n    res.send({\n      status: 1,\n      message: "Mesure ajoutée"\n    });\n  });\n});`},
+      {label:'SQL → MySQL',icon:'🗄️',
+       summary:'INSERT … VALUES(23)',
+       detail:'conn.query() exécute l\'INSERT avec la valeur extraite de req.body.TEMP. MySQL assigne automatiquement un nouvel ID auto-increment et insère la ligne dans la table TEMPERATURE.',
+       code:'-- SQL généré :\nINSERT INTO TEMPERATURE(TEMP)\n  VALUES(23)\n\n-- Résultat : nouvelle ligne insérée\n-- id auto-increment attribué par MySQL'},
+      {label:'Réponse JSON',icon:'📥',
+       summary:'200 OK → {status:1}',
+       detail:'Une fois l\'INSERT confirmé par MySQL, res.send() renvoie un message JSON de succès au client. Pour un POST, on pourrait aussi renvoyer status 201 Created — c\'est plus strict REST.',
+       code:'HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"status":1,"message":"Mesure ajoutée"}'},
+    ]},
+  PUT:{c:'U',
+    phases:[
+      {label:'Requête HTTP',icon:'💻',
+       summary:'PUT /temperature/12 + body',
+       detail:'Le client envoie PUT avec l\'ID dans l\'URL (/temperature/12) ET les nouvelles données dans le corps JSON. Le header Content-Type: application/json est obligatoire pour que bodyParser.json() fonctionne.',
+       code:'PUT /temperature/12 HTTP/1.1\nHost: localhost:3000\nContent-Type: application/json\n\n{"TEMP": 25}'},
+      {label:'Handler Express',icon:'⚙️',
+       summary:'params.ID=12 + body.TEMP=25',
+       detail:'Express mappe la route app.put(\'"/temperature/:ID\'"). Le segment :ID capture la valeur dans l\'URL. bodyParser.json() parse le body :\n→ req.params.ID   = "12"  (string ! de l\'URL)\n→ req.body.TEMP   = 25   (number, du JSON)\n→ req.query       = {}',
+       code:`app.put('/temperature/:ID', (req, res) => {\n  const id      = req.params.ID;  // "12" (URL)\n  const newTemp = req.body.TEMP;  //  25  (JSON)\n  const sql =\n    'UPDATE TEMPERATURE SET TEMP=? WHERE id=?';\n  conn.query(sql, [newTemp, id], (err) => {\n    res.send({\n      status: 1,\n      message: "Mesure mise à jour"\n    });\n  });\n});`},
+      {label:'SQL → MySQL',icon:'🗄️',
+       summary:'UPDATE … WHERE id=12',
+       detail:'conn.query() exécute l\'UPDATE ciblé sur la ligne id=12. L\'utilisation de paramètres (?) protège contre les injections SQL. MySQL met à jour la colonne TEMP et confirme.',
+       code:'-- SQL généré :\nUPDATE TEMPERATURE\n  SET TEMP = 25\n  WHERE id = 12\n\n-- Protection SQL : valeurs passées\n-- en paramètres [ newTemp, id ]'},
+      {label:'Réponse JSON',icon:'📥',
+       summary:'200 OK → {status:1}',
+       detail:'MySQL confirme la mise à jour. res.send() renvoie le message JSON au client. Si id=12 n\'existait pas, MySQL n\'aurait modifié aucune ligne (affectedRows = 0) — à gérer dans un vrai projet.',
+       code:'HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"status":1,"message":"Mesure mise à jour"}'},
+    ]},
+  DELETE:{c:'D',
+    phases:[
+      {label:'Requête HTTP',icon:'💻',
+       summary:'DELETE /temperature/12',
+       detail:'Le client envoie DELETE avec l\'ID dans l\'URL. Aucun corps (body) n\'est nécessaire : l\'identifiant suffit. C\'est la méthode HTTP la plus simple côté client.',
+       code:'DELETE /temperature/12 HTTP/1.1\nHost: localhost:3000\n(aucun body requis)'},
+      {label:'Handler Express',icon:'⚙️',
+       summary:'req.params.ID = "12"',
+       detail:'Express mappe la route app.delete(\'"/temperature/:ID\'"). :ID capture le segment de l\'URL. bodyParser.json() ne fait rien (pas de body) :\n→ req.params.ID   = "12"  (string de l\'URL)\n→ req.body        = undefined\n→ req.query       = {}',
+       code:`app.delete('/temperature/:ID', (req, res) => {\n  const id  = req.params.ID;  // "12"\n  const sql =\n    'DELETE FROM TEMPERATURE WHERE id = ?';\n  conn.query(sql, [id], (err) => {\n    res.send({\n      status: 1,\n      message: "Mesure supprimée"\n    });\n  });\n});`},
+      {label:'SQL → MySQL',icon:'🗄️',
+       summary:'DELETE … WHERE id=12',
+       detail:'conn.query() exécute le DELETE ciblé. MySQL supprime la ligne id=12 et confirme avec affectedRows=1. Si la ligne n\'existe pas, affectedRows=0 — à vérifier dans un vrai projet.',
+       code:'-- SQL généré :\nDELETE FROM TEMPERATURE\n  WHERE id = 12\n\n-- Table après DELETE :\n-- id=1 TEMP=25°C (id=12 supprimé !)'},
+      {label:'Réponse JSON',icon:'📥',
+       summary:'200 OK → {status:1}',
+       detail:'MySQL confirme la suppression. res.send() renvoie le message JSON. Pour un DELETE réussi, le standard REST recommande 204 No Content (sans body) — ici on choisit d\'envoyer un message explicite.',
+       code:'HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"status":1,"message":"Mesure supprimée"}'},
+    ]},
+};
+
+function mthBadge(m,k){const c=C[k]||C.G;return`<span class="sql-badge" style="background:${c.bg};border-color:${c.bd};color:${c.tx}">${m}</span>`;}
+
+function renderOverview(){
+  const MAP={GET:{c:'G',url:'/temperature',extra:'?ID=…',sql:'SELECT * FROM TEMPERATURE',desc:'Lire les mesures',app:"app.get('/temperature',…)"},POST:{c:'P',url:'/temperature',extra:'Body JSON',sql:'INSERT INTO TEMPERATURE(TEMP) VALUES(…)',desc:'Ajouter une mesure',app:"app.post('/temperature',…)"},PUT:{c:'U',url:'/temperature/:ID',extra:'Body JSON',sql:'UPDATE TEMPERATURE SET TEMP=… WHERE id=…',desc:'Modifier une mesure',app:"app.put('/temperature/:ID',…)"},DELETE:{c:'D',url:'/temperature/:ID',extra:'',sql:'DELETE FROM TEMPERATURE WHERE id=…',desc:'Supprimer une mesure',app:"app.delete('/temperature/:ID',…)"}};
+  const m=MAP[ovMth];const c=C[m.c];
+  return`<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:12px">${Object.keys(MAP).map(k=>`<span class="mth${ovMth===k?' sel':''}" style="background:${C[MAP[k].c].bg};border-color:${C[MAP[k].c].bd};color:${C[MAP[k].c].tx}" onclick="setOvMth('${k}')">${k}</span>`).join('')}</div>
+  <div style="display:flex;align-items:stretch;gap:6px">
+    <div class="sbox" style="border-color:${c.bd}">
+      <div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:6px;font-weight:500">💻 CLIENT HTTP</div>
+      <div style="margin-bottom:5px">${mthBadge(ovMth,m.c)}</div>
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--color-text-secondary)">localhost:3000${m.url}</div>
+      ${m.extra?`<div style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary);margin-top:3px">${m.extra}</div>`:''}
+    </div>
+    <div class="sarr" style="color:${c.tx}">→</div>
+    <div class="sbox" style="flex:1.6;border-color:${c.bd}">
+      <div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:6px;font-weight:500">⚙️ SERVEUR NODE.JS / EXPRESS</div>
+      <div style="font-family:var(--font-mono);font-size:11px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:5px;padding:5px 9px;margin-bottom:6px">Middleware : app.use(bodyParser.json())</div>
+      <div style="font-family:var(--font-mono);font-size:12px;color:${c.tx};font-weight:500">${m.app}</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">${m.desc}</div>
+      <div style="font-family:var(--font-mono);font-size:11px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:5px;padding:4px 9px;margin-top:6px;color:${c.tx}">conn.query(sql) → résultats</div>
+    </div>
+    <div class="sarr" style="color:${c.tx}">→</div>
+    <div class="sbox" style="border-color:${c.bd}">
+      <div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:6px;font-weight:500">🗄️ MySQL — DATABASE METEO</div>
+      <div style="font-family:var(--font-mono);font-size:11px;color:${c.tx};background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:5px;padding:5px 9px;margin-bottom:7px">${m.sql}</div>
+      <table class="tbl"><thead><tr><th>id</th><th>TEMP</th></tr></thead><tbody><tr><td>1</td><td>25°C</td></tr><tr><td>12</td><td>18°C</td></tr></tbody></table>
+    </div>
+  </div>
+  <div style="text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary);margin-top:9px">app.listen(3000) → Le serveur écoute sur le port 3000</div>`;
+}
+window.setOvMth=k=>{ovMth=k;document.getElementById('sbody').innerHTML=renderOverview();};
+
+function renderReq(){
+  const REQ_PROPS=[
+    {name:'req.method',icon:'🔵',ex:'GET | POST | PUT | DELETE',desc:"La méthode HTTP utilisée par le client. Express utilise ce champ pour router vers app.get(), app.post(), etc.",val:'\'GET\''},
+    {name:'req.url',icon:'🔗',ex:'/temperature?ID=5',desc:"L'URL complète demandée, chemin + query string.",val:'\'/temperature?ID=5\''},
+    {name:'req.query',icon:'❓',ex:'GET /temperature?ID=5 → { ID:"5" }',desc:"Objet des paramètres après le ?. Exemple : /temperature?ID=5 → req.query.ID = \"5\".\n⚠ Valeur toujours de type String !",val:'{ ID: \'5\' }'},
+    {name:'req.params',icon:'🔑',ex:'GET /temperature/12 → { ID:"12" }',desc:"Objet des segments dynamiques de l'URL. Route définie avec :ID → /temperature/12 → req.params.ID = \"12\".",val:'{ ID: \'12\' }'},
+    {name:'req.body',icon:'📦',ex:'POST {"TEMP":23} → { TEMP:23 }',desc:"Corps de la requête parsé en JSON. Disponible uniquement après bodyParser.json() (ou express.json()) ET uniquement pour POST/PUT. Sans middleware → undefined !",val:'{ TEMP: 23 }'},
+  ];
+  const rp=REQ_PROPS[selRp];
+  return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start">
+  <div>${REQ_PROPS.map((p,i)=>`<div class="req-prop${selRp===i?' sel-rp':''}" onclick="setRp(${i})">
+    <span style="font-size:16px;flex-shrink:0">${p.icon}</span>
+    <div style="flex:1"><div style="font-family:var(--font-mono);font-size:13px;font-weight:500">${p.name}</div><div style="font-size:11px;color:var(--color-text-tertiary);margin-top:1px">${p.ex}</div></div>
+  </div>`).join('')}</div>
+  <div style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-info);border-radius:var(--border-radius-md);padding:13px">
+    <div style="font-family:var(--font-mono);font-size:14px;font-weight:500;color:var(--color-text-info);margin-bottom:6px">${rp.name}</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);white-space:pre-line;margin-bottom:10px;line-height:1.7">${rp.desc}</div>
+    <div style="font-size:11.5px;color:var(--color-text-tertiary);margin-bottom:4px">Valeur extraite :</div>
+    <div class="cb" style="background:var(--color-background-primary);font-size:12px">${rp.name} → <span style="color:var(--color-text-info)">${rp.val}</span></div>
+  </div>
+</div>
+<div style="margin-top:10px;background:var(--color-background-warning);border:0.5px solid var(--color-border-warning);border-radius:8px;padding:9px 14px;display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--color-text-warning)">
+  <span><code style="font-family:var(--font-mono)">req</code> → ce que le client envoie</span>
+  <span><code style="font-family:var(--font-mono)">res</code> → ce que le serveur renvoie</span>
+  <span><code style="font-family:var(--font-mono)">req.query</code> → paramètres ?</span>
+  <span><code style="font-family:var(--font-mono)">req.params</code> → :ID dans l'URL</span>
+  <span><code style="font-family:var(--font-mono)">req.body</code> → JSON (POST/PUT)</span>
+</div>`;
+}
+window.setRp=i=>{selRp=i;document.getElementById('sbody').innerHTML=renderReq();};
+
+function getSimState(mth){
+  return{step:window['_s_'+mth]??-1,running:window['_r_'+mth]??false};
+}
+function setSimState(mth,step,running){
+  window['_s_'+mth]=step;
+  window['_r_'+mth]=running;
+}
+
+function renderMethod(mth){
+  const d=MDATA[mth];const c=C[d.c];
+  const {step,running}=getSimState(mth);
+  const phases=d.phases;
+  const notStarted=step<0;
+  const at=i=>step===i;
+  const passed=i=>step>i;
+
+  function boxStyle(i){
+    if(at(i)) return`border-color:${c.bd};background:${c.bg};`;
+    if(passed(i)) return`border-color:var(--color-border-success);background:var(--color-background-success);opacity:.75;`;
+    return'';
+  }
+  function txtStyle(i){
+    if(at(i)) return`color:${c.tx};`;
+    if(passed(i)) return`color:var(--color-text-success);`;
+    return`color:var(--color-text-tertiary);`;
+  }
+  function arrStyle(i){
+    if(at(i)||passed(i)) return`color:${c.tx};`;
+    return`color:var(--color-text-tertiary);`;
+  }
+
+  return`
+<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:10px">
+${phases.map((p,i)=>`
+  <div class="sbox${at(i)?' lit':''}" style="${boxStyle(i)}min-height:80px">
+    ${at(i)?`<div style="position:absolute;top:6px;right:6px;font-size:9px;font-weight:500;padding:1px 6px;border-radius:3px;background:${c.bd};color:#fff">EN COURS</div>`:''}
+    ${passed(i)?`<div style="position:absolute;top:6px;right:6px;font-size:11px">✓</div>`:''}
+    <div style="font-size:9px;font-weight:500;margin-bottom:4px;${txtStyle(i)}">${i+1} / ${phases.length}</div>
+    <div style="font-size:11px;font-weight:500;margin-bottom:4px;${txtStyle(i)}">${p.icon} ${p.label}</div>
+    <div style="font-family:var(--font-mono);font-size:10.5px;${txtStyle(i)}">${p.summary}</div>
+  </div>
+  ${i<phases.length-1?`<div class="sarr${at(i)?' lit':''}" style="${arrStyle(i)}">→</div>`:''}
+`).join('')}
+</div>
+
+<div style="min-height:100px;padding:13px 15px;border-radius:9px;border:1.5px solid ${notStarted?'var(--color-border-tertiary)':at(0)||at(1)||at(2)||at(3)?c.bd:'var(--color-border-success)'};background:${notStarted?'var(--color-background-secondary)':at(0)||at(1)||at(2)||at(3)?c.bg:'var(--color-background-success)'};transition:all .35s">
+  <div style="font-size:11px;font-weight:500;margin-bottom:6px;color:${notStarted?'var(--color-text-tertiary)':at(0)||at(1)||at(2)||at(3)?c.tx:'var(--color-text-success)'}">
+    ${notStarted?'Appuyez sur ▶ Démarrer pour lancer la simulation pas à pas.':`Étape ${step+1}/4 — ${phases[step]?.label}`}
+  </div>
+  <div style="font-size:13px;line-height:1.78;color:${notStarted?'var(--color-text-tertiary)':at(0)||at(1)||at(2)||at(3)?c.tx:'var(--color-text-success)'};white-space:pre-line">
+    ${step>=0&&step<phases.length?phases[step].detail:''}
+  </div>
+</div>
+
+${step>=0&&step<phases.length?`<div style="margin-top:9px">
+  <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:5px">💻 Code — étape ${step+1} :</div>
+  <div class="cb" style="font-size:11.5px">${phases[step].code}</div>
+</div>`:''}
+
+<div style="display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap">
+  <button onclick="simReset('${mth}')" style="font-size:12px" title="Réinitialiser">⏮</button>
+  <button onclick="simManual('${mth}',-1)" ${step<=0?'disabled':''} style="font-size:12px">◀ Préc</button>
+  <button onclick="simToggle('${mth}')" style="font-size:12px;min-width:90px">${running?'⏸ Pause':'▶ Démarrer'}</button>
+  <button onclick="simManual('${mth}',1)" ${step>=phases.length-1?'disabled':''} style="font-size:12px">Suiv ▶</button>
+  <span style="flex:1"></span>
+  <span style="font-size:11px;color:var(--color-text-tertiary)">Vitesse :</span>
+  <button class="spd${window._simSpeed===1600?' on':''}" onclick="setSpd(1600)">Lent</button>
+  <button class="spd${window._simSpeed===900?' on':''}" onclick="setSpd(900)">Normal</button>
+  <button class="spd${window._simSpeed===400?' on':''}" onclick="setSpd(400)">Rapide</button>
+</div>`;
+}
+
+function simRender(mth){document.getElementById('sbody').innerHTML=renderMethod(mth);}
+
+window.simToggle=function(mth){
+  const{step,running}=getSimState(mth);
+  if(running){
+    clearInterval(window._simT);window._simT=null;
+    setSimState(mth,step,false);
+    simRender(mth);
+  } else {
+    const start=step<0?0:step;
+    setSimState(mth,start<MDATA[mth].phases.length?start:0,true);
+    simRender(mth);
+    window._simT=setInterval(()=>{
+      const{step:s}=getSimState(mth);
+      const next=s+1;
+      if(next>=MDATA[mth].phases.length){
+        clearInterval(window._simT);window._simT=null;
+        setSimState(mth,s,false);
+        simRender(mth);
+      } else {
+        setSimState(mth,next,true);
+        simRender(mth);
+      }
+    },window._simSpeed);
+  }
+};
+
+window.simManual=function(mth,dir){
+  clearInterval(window._simT);window._simT=null;
+  const{step}=getSimState(mth);
+  const next=Math.max(-1,Math.min(MDATA[mth].phases.length-1,step+dir));
+  setSimState(mth,next,false);
+  simRender(mth);
+};
+
+window.simReset=function(mth){
+  clearInterval(window._simT);window._simT=null;
+  setSimState(mth,-1,false);
+  simRender(mth);
+};
+
+window.setSpd=function(ms){
+  window._simSpeed=ms;
+  const mths=['GET','POST','PUT','DELETE'];
+  const active=mths.find(m=>window['_r_'+m]);
+  if(active){
+    clearInterval(window._simT);window._simT=null;
+    window._simT=setInterval(()=>{
+      const{step:s}=getSimState(active);
+      const next=s+1;
+      if(next>=MDATA[active].phases.length){
+        clearInterval(window._simT);window._simT=null;
+        setSimState(active,s,false);simRender(active);
+      } else {setSimState(active,next,true);simRender(active);}
+    },ms);
+  }
+  const curMth=['GET','POST','PUT','DELETE'][cur-2];
+  if(curMth)simRender(curMth);
+  else document.querySelectorAll('.spd').forEach(b=>{b.classList.toggle('on',parseInt(b.getAttribute('onclick').match(/\d+/)[0])===ms);});
+};
+
+const RENDERS=[
+  ()=>renderOverview(),
+  ()=>renderReq(),
+  ()=>renderMethod('GET'),
+  ()=>renderMethod('POST'),
+  ()=>renderMethod('PUT'),
+  ()=>renderMethod('DELETE'),
+];
+
+function render(){
+  clearInterval(window._simT);window._simT=null;
+  const s=STEPS[cur];
+  document.getElementById('sttl').textContent=s.title;
+  document.getElementById('sdesc').textContent=s.desc;
+  document.getElementById('slbl').textContent=`Étape ${cur+1} / ${STEPS.length}`;
+  document.getElementById('snb').textContent=`${cur+1} / ${STEPS.length}`;
+  document.getElementById('sbody').innerHTML=RENDERS[cur]();
+  document.getElementById('bprev').disabled=cur===0;
+  document.getElementById('bnext').disabled=cur===STEPS.length-1;
+  document.querySelectorAll('.nav-dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+}
+window.nav=function(d){
+  ['GET','POST','PUT','DELETE'].forEach(m=>{window['_r_'+m]=false;});
+  cur=Math.max(0,Math.min(STEPS.length-1,cur+d));render();
+};
+const dotsEl=document.getElementById('dots');
+STEPS.forEach((_,i)=>{
+  const b=document.createElement('button');
+  b.className='nav-dot'+(i===0?' on':'');
+  b.setAttribute('aria-label','Étape '+(i+1));
+  b.onclick=()=>nav(i-cur);
+  dotsEl.appendChild(b);
+});
+render();
+</script>

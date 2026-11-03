@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supports de cours — BTS CIEL</title>
+<meta name="description" content="Cheatsheets, posters et animations interactives : réseaux, sécurité, web, programmation, IoT.">
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #1a1d23; --muted: #5d6573;
+    --border: #e2e5ea; --accent: #2563eb; --accent-soft: #e8efff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1115; --card: #171a21; --text: #e7e9ee; --muted: #9aa2b1;
+      --border: #262b35; --accent: #7aa2ff; --accent-soft: #1c2640;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 16px 64px; }
+  header h1 { margin: 0 0 6px; font-size: clamp(1.7rem, 4vw, 2.4rem); letter-spacing: -0.02em; }
+  header p { margin: 0; color: var(--muted); }
+  .search {
+    margin: 28px 0 8px; width: 100%; padding: 12px 14px; font: inherit;
+    border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text);
+  }
+  .search:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  section { margin-top: 36px; }
+  h2 {
+    font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin: 0 0 12px;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  a.card {
+    display: block; padding: 16px; border: 1px solid var(--border); border-radius: 12px;
+    background: var(--card); color: inherit; text-decoration: none;
+    transition: border-color .15s, transform .15s;
+  }
+  a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card strong { display: block; margin-bottom: 4px; }
+  .card span { color: var(--muted); font-size: .9rem; }
+  .tag {
+    display: inline-block; margin-top: 10px; padding: 2px 8px; border-radius: 999px;
+    font-size: .75rem; background: var(--accent-soft); color: var(--accent);
+  }
+  footer { margin-top: 56px; color: var(--muted); font-size: .85rem; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Supports de cours</h1>
+    <p>Cheatsheets, posters et animations interactives — BTS CIEL</p>
+  </header>
+
+  <input class="search" type="search" placeholder="Rechercher un support…" aria-label="Rechercher">
+
+  <section>
+    <h2>Réseaux &amp; Cisco</h2>
+    <div class="grid">
+      <a class="card" href="cisco-ios-cours.html"><strong>Cisco IOS</strong><span>Cours interactif avec simulateur de console</span><div class="tag">Cours</div></a>
+      <a class="card" href="cisco-switch-routeur.html"><strong>Configuration Cisco</strong><span>Switch &amp; routeur</span><div class="tag">Poster</div></a>
+      <a class="card" href="acl-cisco-cheatsheet.html"><strong>ACL Cisco</strong><span>Listes de contrôle d'accès</span><div class="tag">Cheatsheet</div></a>
+      <a class="card" href="acl-cisco-rollup.html"><strong>ACL Cisco — Rollup</strong><span>Format kakémono 85×200</span><div class="tag">Poster</div></a>
+      <a class="card" href="tcp-wireshark.html"><strong>TCP &amp; Wireshark</strong><span>Connexion complète pas à pas</span><div class="tag">Animation</div></a>
+      <a class="card" href="wifi-phy-poster.html"><strong>Wi-Fi — Couche PHY</strong><span>Radiofréquence et modulation</span><div class="tag">Poster</div></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Sécurité</h2>
+    <div class="grid">
+      <a class="card" href="ssh-known-hosts.html"><strong>SSH &amp; known_hosts</strong><span>Vérification de l'hôte</span><div class="tag">Animation</div></a>
+      <a class="card" href="tls-cheatsheet.html"><strong>TLS</strong><span>Handshake, certificats, chiffrement</span><div class="tag">Cheatsheet</div></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Web &amp; HTTP</h2>
+    <div class="grid">
+      <a class="card" href="voyage-requete-http.html"><strong>Le voyage de la requête HTTP</strong><span>Du navigateur au serveur</span><div class="tag">Animation</div></a>
+      <a class="card" href="cors-animation.html"><strong>Le triangle CORS</strong><span>Négociation en 4 étapes</span><div class="tag">Animation</div></a>
+      <a class="card" href="cheatsheet-http-cors.html"><strong>HTTP &amp; CORS</strong><span>Méthodes, en-têtes, codes</span><div class="tag">Cheatsheet</div></a>
+      <a class="card" href="api-rest-express.html"><strong>API REST — Express &amp; MySQL</strong><span>Architecture d'une API</span><div class="tag">Animation</div></a>
+      <a class="card" href="http-express-temperature.html"><strong>API Express — Température</strong><span>Simulation pas à pas</span><div class="tag">Animation</div></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Programmation</h2>
+    <div class="grid">
+      <a class="card" href="intro-javascript.html"><strong>Introduction à JavaScript</strong><span>Les bases du langage</span><div class="tag">Cours</div></a>
+      <a class="card" href="classes-javascript.html"><strong>Les classes en JavaScript</strong><span>Programmation orientée objet</span><div class="tag">Cours</div></a>
+      <a class="card" href="concurrence-async.html"><strong>Concurrence &amp; asynchronisme</strong><span>JS · Python · C</span><div class="tag">Poster</div></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>IoT &amp; Industriel</h2>
+    <div class="grid">
+      <a class="card" href="lorawan-poster.html"><strong>LoRaWAN</strong><span>Architecture et protocole</span><div class="tag">Poster</div></a>
+      <a class="card" href="modbus-armoire.html"><strong>Modbus en images</strong><span>L'armoire et ses tiroirs</span><div class="tag">Animation</div></a>
+      <a class="card" href="can-bus-vehicule.html"><strong>Bus CAN &amp; véhicule connecté</strong><span>ECU, trames, réseau embarqué</span><div class="tag">Cours</div></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>DevOps</h2>
+    <div class="grid">
+      <a class="card" href="docker-cours.html"><strong>Docker</strong><span>Présentation interactive complète</span><div class="tag">Cours</div></a>
+    </div>
+  </section>
+
+  <footer>Samuel Bouhenic</footer>
+</div>
+<script>
+  const input = document.querySelector('.search');
+  input.addEventListener('input', () => {
+    const q = input.value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    document.querySelectorAll('section').forEach(sec => {
+      let any = false;
+      sec.querySelectorAll('.card').forEach(c => {
+        const t = c.textContent.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const hit = t.includes(q);
+        c.classList.toggle('hidden', !hit);
+        any = any || hit;
+      });
+      sec.classList.toggle('hidden', !any);
+    });
+  });
+</script>
+</body>
+</html>

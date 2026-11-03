@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Concurrence &amp; Asynchronisme — JS · Python · C — BTS CIEL</title>
+<style>
+/* ── Palette terminal ── */
+:root {
+  --bg:     #0d1117;
+  --bg2:    #161b22;
+  --bg3:    #21262d;
+  --border: #30363d;
+  --text:   #e6edf3;
+  --muted:  #8b949e;
+  --blue:   #79c0ff;
+  --green:  #56d364;
+  --yellow: #e3b341;
+  --red:    #ff7b72;
+  --purple: #d2a8ff;
+  --orange: #ffa657;
+  --cyan:   #39d353;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  padding: 1.6rem 2rem;
+  min-height: 100vh;
+}
+.poster { max-width: 1560px; margin: 0 auto; }
+
+/* ── En-tête ── */
+.header {
+  display: flex; justify-content: space-between;
+  align-items: flex-end; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 1.2rem;
+  padding-bottom: .9rem;
+  border-bottom: 2px solid var(--border);
+}
+.title    { font-size: 28px; font-weight: 700; letter-spacing: -.5px; }
+.subtitle { font-size: 11.5px; color: var(--muted); margin-top: 4px; letter-spacing: .03em; }
+
+/* ── Section label ── */
+.sl {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 5px;
+}
+
+/* ── Grilles ── */
+.sec  { margin-bottom: 1.1rem; }
+.g2   { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.g3   { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
+.g4   { display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; }
+.g32  { display: grid; grid-template-columns: 3fr 2fr; gap: 11px; }
+
+/* ── Cartes ── */
+.card  { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: .75rem .9rem; height:100%; }
+.card2 { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: .75rem .9rem; height:100%; }
+
+/* ── Séparateur ── */
+.sep { border: none; border-top: 1px solid var(--border); margin: 7px 0; }
+
+/* ── Badges ── */
+.badge { display: inline-flex; font-size: 10px; font-weight: 700;
+         padding: 2px 8px; border-radius: 3px; letter-spacing: .04em; }
+.bi { background: #1f3a56; color: var(--blue); }
+.bs { background: #1a3a2a; color: var(--green); }
+.bw { background: #3a2e1a; color: var(--yellow); }
+.bd { background: #3a1a1a; color: var(--red); }
+.bg { background: var(--bg3); color: var(--muted); }
+.bp { background: #2d1f4a; color: var(--purple); }
+.bo { background: #3a2810; color: var(--orange); }
+
+/* ── Couleurs syntaxiques ── */
+.ci  { color: var(--blue); }
+.cs  { color: var(--green); }
+.cw  { color: var(--yellow); }
+.cd  { color: var(--red); }
+.cm  { color: var(--muted); }
+.cp  { color: var(--text); font-weight: 700; }
+.pur { color: var(--purple); }
+.cor { color: var(--orange); }
+
+/* ── Code ── */
+pre {
+  font-family: 'Courier New', monospace;
+  font-size: 10.8px; line-height: 1.68;
+  margin: 0; white-space: pre;
+  overflow: hidden;
+}
+code { font-family: 'Courier New', monospace; font-size: 10.5px; }
+
+/* ── Tableaux ── */
+table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+td, th { padding: 4.5px 4px; vertical-align: top; }
+tr + tr td { border-top: 1px solid var(--border); }
+th {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--muted); padding-bottom: 5px;
+  text-align: left;
+}
+
+/* ── Pied de page ── */
+.footer {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 9px; margin-top: 4px;
+  flex-wrap: wrap; gap: 6px;
+}
+
+/* ── Impression A1 paysage ── */
+@media print {
+  @page { size: A1 landscape; margin: 12mm; }
+  body  { padding: 0; background: #0d1117 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .poster { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <!-- ══════════════════════════════════════════════════════ EN-TÊTE -->
+  <div class="header">
+    <div>
+      <div class="title">⚡ Mono-Thread · Multi-Thread · Async &amp; Promises</div>
+      <div class="subtitle">Concurrence &amp; Asynchronisme · JavaScript ES2017+ · Python 3.11+ · C / POSIX Threads · BTS CIEL IR/ER</div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span class="badge bw">JavaScript</span>
+      <span class="badge bi">Python 3</span>
+      <span class="badge bp">C / pthreads</span>
+      <span class="badge bs">async/await</span>
+      <span class="badge bo">Event Loop</span>
+      <span class="badge bg">mutex · GIL · Promises</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ SECTION 1 : CONCEPTS FONDAMENTAUX -->
+  <div class="sec">
+    <p class="sl">① Modèles d'exécution — Vue d'ensemble</p>
+    <div class="g3">
+
+      <!-- Mono-thread -->
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+          <span class="badge bg" style="font-size:12px">①</span>
+          <span style="font-size:14px;font-weight:700;color:var(--blue)">Mono-Thread</span>
+          <span class="badge bg" style="margin-left:auto">séquentiel · bloquant</span>
+        </div>
+        <!-- Timeline visuelle -->
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:8px 10px;margin-bottom:8px;font-size:11px">
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+            <span class="cm" style="width:55px;flex-shrink:0">Thread 1</span>
+            <span style="background:#1f3a56;color:var(--blue);padding:2px 10px;border-radius:3px;font-weight:700">Tâche A</span>
+            <span style="background:#1a3a2a;color:var(--green);padding:2px 10px;border-radius:3px;font-weight:700">Tâche B</span>
+            <span style="background:#2d1f4a;color:var(--purple);padding:2px 10px;border-radius:3px;font-weight:700">Tâche C</span>
+          </div>
+          <div style="font-size:10px;color:var(--muted)">
+            ←────────────────── temps ──────────────────→ (séquentiel)
+          </div>
+        </div>
+        <table>
+          <tr><td class="cm" style="width:45%">Fils d'exécution</td><td class="ci">1 seul (main thread)</td></tr>
+          <tr><td class="cm">Blocage I/O</td><td class="cd">Tout le programme attend</td></tr>
+          <tr><td class="cm">Parallélisme</td><td class="cd">Aucun</td></tr>
+          <tr><td class="cm">Complexité</td><td class="cs">Simple à debugger</td></tr>
+          <tr><td class="cm">Race condition</td><td class="cs">Impossible</td></tr>
+          <tr><td class="cm">Usage typique</td><td class="cw">Script CLI, traitement batch</td></tr>
+        </table>
+      </div>
+
+      <!-- Multi-thread -->
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+          <span class="badge bg" style="font-size:12px">②</span>
+          <span style="font-size:14px;font-weight:700;color:var(--yellow)">Multi-Thread</span>
+          <span class="badge bg" style="margin-left:auto">parallèle · multi-core</span>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:8px 10px;margin-bottom:8px;font-size:11px">
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+            <span class="cm" style="width:55px;flex-shrink:0">Thread 1</span>
+            <span style="background:#1f3a56;color:var(--blue);padding:2px 48px;border-radius:3px;font-weight:700">Tâche A</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+            <span class="cm" style="width:55px;flex-shrink:0">Thread 2</span>
+            <span style="background:#1a3a2a;color:var(--green);padding:2px 48px;border-radius:3px;font-weight:700">Tâche B</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+            <span class="cm" style="width:55px;flex-shrink:0">Thread 3</span>
+            <span style="background:#2d1f4a;color:var(--purple);padding:2px 48px;border-radius:3px;font-weight:700">Tâche C</span>
+          </div>
+          <div style="font-size:10px;color:var(--muted)">
+            ←────────────────── exécution simultanée ──────────────────→
+          </div>
+        </div>
+        <table>
+          <tr><td class="cm" style="width:45%">Fils d'exécution</td><td class="cw">N threads OS simultanés</td></tr>
+          <tr><td class="cm">Blocage I/O</td><td class="cs">Seul ce thread est bloqué</td></tr>
+          <tr><td class="cm">Parallélisme</td><td class="cs">Réel (plusieurs cores)</td></tr>
+          <tr><td class="cm">Complexité</td><td class="cd">Élevée (sync requise)</td></tr>
+          <tr><td class="cm">Race condition</td><td class="cd">Possible → mutex requis</td></tr>
+          <tr><td class="cm">Usage typique</td><td class="cw">CPU-bound, serveur, GUI</td></tr>
+        </table>
+      </div>
+
+      <!-- Async / Event Loop -->
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+          <span class="badge bg" style="font-size:12px">③</span>
+          <span style="font-size:14px;font-weight:700;color:var(--green)">Async / Event Loop</span>
+          <span class="badge bg" style="margin-left:auto">coopératif · 1 fil</span>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:8px 10px;margin-bottom:8px;font-size:11px">
+          <div style="display:flex;align-items:center;gap:3px;margin-bottom:3px">
+            <span class="cm" style="width:55px;flex-shrink:0">Thread 1</span>
+            <span style="background:#1f3a56;color:var(--blue);padding:2px 16px;border-radius:3px;font-weight:700">A</span>
+            <span style="color:var(--muted);font-size:10px;padding:0 3px">await</span>
+            <span style="background:#1a3a2a;color:var(--green);padding:2px 16px;border-radius:3px;font-weight:700">B</span>
+            <span style="color:var(--muted);font-size:10px;padding:0 3px">await</span>
+            <span style="background:#2d1f4a;color:var(--purple);padding:2px 16px;border-radius:3px;font-weight:700">C</span>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">
+            pendant <span class="ci">await</span> → l'event loop exécute d'autres callbacks
+          </div>
+        </div>
+        <table>
+          <tr><td class="cm" style="width:45%">Fils d'exécution</td><td class="cs">1 seul + event loop</td></tr>
+          <tr><td class="cm">Blocage I/O</td><td class="cs">Cède le contrôle (await)</td></tr>
+          <tr><td class="cm">Parallélisme</td><td class="cw">Concurrence (pas vrai //)</td></tr>
+          <tr><td class="cm">Complexité</td><td class="cw">Moyenne</td></tr>
+          <tr><td class="cm">Race condition</td><td class="cs">Très rare (1 thread)</td></tr>
+          <tr><td class="cm">Usage typique</td><td class="cw">I/O-bound, réseau, API REST</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ SECTION 2 : JAVASCRIPT -->
+  <div class="sec">
+    <p class="sl">② JavaScript — Évolution des patterns asynchrones (Node.js &amp; Navigateur)</p>
+    <div class="g3">
+
+      <!-- Callbacks -->
+      <div>
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+          <span class="badge bw">ES5 – Ancien</span>
+          <span style="font-size:13px;font-weight:700;color:var(--yellow)">Callback</span>
+        </div>
+        <div class="card2">
+<pre><span class="cm">// Callback = fonction passée en argument</span>
+<span class="ci">const</span> <span class="pur">fs</span> = <span class="ci">require</span>(<span class="cs">'fs'</span>);
+
+<span class="pur">fs</span>.<span class="cw">readFile</span>(<span class="cs">'data.txt'</span>, <span class="cs">'utf8'</span>,
+  (<span class="pur">err</span>, <span class="pur">data</span>) => {
+    <span class="ci">if</span> (<span class="pur">err</span>) <span class="ci">throw</span> <span class="pur">err</span>;
+    <span class="cw">parse</span>(<span class="pur">data</span>, (<span class="pur">err2</span>, <span class="pur">json</span>) => {
+      <span class="ci">if</span> (<span class="pur">err2</span>) <span class="ci">throw</span> <span class="pur">err2</span>;
+      <span class="cd">sauvegarder</span>(<span class="pur">json</span>, (<span class="pur">err3</span>) => {
+        <span class="cm">// 🔥 Pyramid of Doom !</span>
+        <span class="cm">// impossible à maintenir</span>
+      });
+    });
+  }
+);</pre>
+          <hr class="sep">
+          <div style="font-size:11px;color:var(--muted);line-height:1.7">
+            <span class="cd">⚠ Callback Hell</span> : chaque opération async imbrique un nouveau callback.<br>
+            Propagation d'erreurs manuelle à chaque niveau.<br>
+            <span class="cm">Toujours vérifier</span> <code class="cd">err</code> <span class="cm">en premier argument (convention Node.js).</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Promises -->
+      <div>
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+          <span class="badge bi">ES2015</span>
+          <span style="font-size:13px;font-weight:700;color:var(--blue)">Promise</span>
+        </div>
+        <div class="card2">
+<pre><span class="cm">// 3 états : pending → fulfilled | rejected</span>
+<span class="ci">const</span> <span class="pur">p</span> = <span class="ci">new</span> <span class="cw">Promise</span>((<span class="pur">resolve</span>, <span class="pur">reject</span>) => {
+  <span class="cm">// opération asynchrone...</span>
+  <span class="ci">if</span> (ok) <span class="cs">resolve</span>(<span class="pur">valeur</span>);
+  <span class="ci">else</span>   <span class="cd">reject</span>(<span class="ci">new</span> <span class="cw">Error</span>(<span class="cs">'raison'</span>));
+});
+<span class="cm">// Chaînage</span>
+<span class="pur">p</span>.<span class="cs">then</span>(<span class="pur">v</span> => <span class="cw">parse</span>(<span class="pur">v</span>))
+ .<span class="cs">then</span>(<span class="pur">j</span> => <span class="cw">sauvegarder</span>(<span class="pur">j</span>))
+ .<span class="cd">catch</span>(<span class="pur">e</span> => <span class="cw">console.error</span>(<span class="pur">e</span>))
+ .<span class="ci">finally</span>(() => <span class="cm">/* nettoyage */</span>);
+
+<span class="cm">// Combinateurs</span>
+<span class="ci">await</span> <span class="cw">Promise</span>.<span class="cs">all</span>([<span class="pur">p1</span>,<span class="pur">p2</span>,<span class="pur">p3</span>]);     <span class="cm">// toutes OK</span>
+<span class="ci">await</span> <span class="cw">Promise</span>.<span class="cs">race</span>([<span class="pur">p1</span>,<span class="pur">p2</span>]);      <span class="cm">// la + rapide</span>
+<span class="ci">await</span> <span class="cw">Promise</span>.<span class="cs">allSettled</span>([<span class="pur">p1</span>,<span class="pur">p2</span>]);<span class="cm">// résultats</span>
+<span class="ci">await</span> <span class="cw">Promise</span>.<span class="cs">any</span>([<span class="pur">p1</span>,<span class="pur">p2</span>]);      <span class="cm">// 1ère réussie</span></pre>
+          <hr class="sep">
+          <div style="font-size:11px;color:var(--muted);line-height:1.7">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+              <span class="badge bw">pending</span>
+              <span style="color:var(--muted)">→</span>
+              <span class="badge bs">fulfilled</span>
+              <span style="color:var(--muted)">/</span>
+              <span class="badge bd">rejected</span>
+            </div>
+            <code class="cs">.then()</code> retourne une nouvelle Promise → chaînable.<br>
+            <span class="cm">1 seul</span> <code class="cd">.catch()</code> <span class="cm">en fin de chaîne suffit.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- async/await -->
+      <div>
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+          <span class="badge bs">ES2017</span>
+          <span style="font-size:13px;font-weight:700;color:var(--green)">async / await</span>
+        </div>
+        <div class="card2">
+<pre><span class="cm">// Syntaxe sync, sémantique async</span>
+<span class="ci">async function</span> <span class="cw">charger</span>(<span class="pur">url</span>) {
+  <span class="ci">try</span> {
+    <span class="ci">const</span> <span class="pur">rep</span>  = <span class="ci">await</span> <span class="cw">fetch</span>(<span class="pur">url</span>);
+    <span class="ci">const</span> <span class="pur">data</span> = <span class="ci">await</span> <span class="pur">rep</span>.<span class="cw">json</span>();
+    <span class="ci">return</span> <span class="pur">data</span>;
+  } <span class="ci">catch</span> (<span class="pur">err</span>) {
+    <span class="cd">console.error</span>(<span class="pur">err</span>);
+  }
+}
+<span class="cm">// Parallèle avec async/await</span>
+<span class="ci">const</span> [<span class="pur">a</span>, <span class="pur">b</span>, <span class="pur">c</span>] = <span class="ci">await</span> <span class="cw">Promise</span>.<span class="cs">all</span>([
+  <span class="cw">charger</span>(<span class="cs">'/api/a'</span>),
+  <span class="cw">charger</span>(<span class="cs">'/api/b'</span>),
+  <span class="cw">charger</span>(<span class="cs">'/api/c'</span>),
+]);
+<span class="cm">// ⚠ Piège : await séquentiel en boucle</span>
+<span class="ci">for</span> (<span class="ci">const</span> <span class="pur">u</span> <span class="ci">of</span> <span class="pur">urls</span>)
+  <span class="ci">await</span> <span class="cw">charger</span>(<span class="pur">u</span>); <span class="cd">// ❌ séquentiel !</span></pre>
+          <hr class="sep">
+          <div style="font-size:11px;color:var(--muted);line-height:1.7">
+            <code class="ci">async</code> → retourne toujours une <span class="ci">Promise</span>.<br>
+            <code class="ci">await</code> → suspend la coroutine, cède à l'event loop.<br>
+            <span class="cs">Top-level await</span> disponible en modules ES (ESM).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ SECTION 3 : EVENT LOOP JS + PYTHON -->
+  <div class="sec g2">
+
+    <!-- Event Loop JS -->
+    <div>
+      <p class="sl">③ JavaScript — Event Loop (modèle mental)</p>
+      <div class="card">
+        <!-- Schéma Event Loop -->
+        <div style="display:flex;gap:10px;align-items:stretch;margin-bottom:9px">
+          <!-- Call Stack -->
+          <div style="flex:1;min-width:0">
+            <div style="font-size:9px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;text-align:center">Call Stack</div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:7px 8px;font-size:10.5px;min-height:85px">
+              <div style="border-bottom:1px solid var(--border);padding-bottom:3px;margin-bottom:3px" class="pur">charger()</div>
+              <div style="border-bottom:1px solid var(--border);padding-bottom:3px;margin-bottom:3px" class="ci">fetch(url) <span class="cm">←await</span></div>
+              <div class="cm" style="font-size:9.5px">↑ LIFO — empilé/dépilé</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;justify-content:center;color:var(--muted);font-size:16px;flex-shrink:0">→</div>
+          <!-- Web APIs -->
+          <div style="flex:1;min-width:0">
+            <div style="font-size:9px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;text-align:center">Web APIs / libuv</div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:7px 8px;font-size:10.5px;min-height:85px">
+              <div class="cw">setTimeout / setInterval</div>
+              <div class="ci">fetch() / XHR / DNS</div>
+              <div class="cs">fs.readFile / socket</div>
+              <div class="pur">addEventListener</div>
+              <div class="cm" style="font-size:9.5px;margin-top:3px">opérations OS non-bloquantes</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;justify-content:center;color:var(--muted);font-size:16px;flex-shrink:0">→</div>
+          <!-- Queues -->
+          <div style="flex:1.2;min-width:0">
+            <div style="font-size:9px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;text-align:center">Task Queues</div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:7px 8px;font-size:10.5px;min-height:85px">
+              <div style="margin-bottom:5px">
+                <div class="cs" style="font-weight:700">① Microtasks <span class="cm">(priorité max)</span></div>
+                <div class="cm" style="font-size:9.5px">Promise.then() · queueMicrotask()</div>
+              </div>
+              <div>
+                <div class="cw" style="font-weight:700">② Macrotasks</div>
+                <div class="cm" style="font-size:9.5px">setTimeout() · setInterval() · I/O cb</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;justify-content:center;color:var(--muted);font-size:16px;flex-shrink:0">↺</div>
+          <!-- Event Loop -->
+          <div style="flex:1;min-width:0">
+            <div style="font-size:9px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;text-align:center">Event Loop</div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:7px 8px;font-size:10.5px;min-height:85px;display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;gap:5px;align-items:flex-start">
+                <span class="badge bi" style="font-size:9px;padding:1px 5px;flex-shrink:0">1</span>
+                <span class="cm" style="font-size:9.5px">Call Stack vide ?</span>
+              </div>
+              <div style="display:flex;gap:5px;align-items:flex-start">
+                <span class="badge bs" style="font-size:9px;padding:1px 5px;flex-shrink:0">2</span>
+                <span class="cm" style="font-size:9.5px">Vider microtasks</span>
+              </div>
+              <div style="display:flex;gap:5px;align-items:flex-start">
+                <span class="badge bw" style="font-size:9px;padding:1px 5px;flex-shrink:0">3</span>
+                <span class="cm" style="font-size:9.5px">1 macrotask</span>
+              </div>
+              <div style="display:flex;gap:5px;align-items:flex-start">
+                <span class="badge bp" style="font-size:9px;padding:1px 5px;flex-shrink:0">↺</span>
+                <span class="cm" style="font-size:9.5px">Recommencer</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr class="sep">
+        <div style="font-size:11px;color:var(--muted);line-height:1.7">
+          JS est <span class="cp">single-threaded</span> : l'event loop gère la concurrence sans threads OS.<br>
+          <span class="cs">Microtasks</span> (<code>Promise.then</code>) sont toujours vidées <em>avant</em> la prochaine <span class="cw">macrotask</span> (<code>setTimeout</code>).<br>
+          <span class="cd">Jamais bloquer</span> le Call Stack (ex: boucle infinie sync → tout est gelé).
+        </div>
+      </div>
+    </div>
+
+    <!-- Python -->
+    <div>
+      <p class="sl">③ Python — threading vs asyncio vs multiprocessing</p>
+      <div class="card2">
+<pre><span class="cm"># ── threading : parallélisme OS, partage mémoire ─────────</span>
+<span class="ci">import</span> <span class="pur">threading</span>, <span class="pur">time</span>
+
+<span class="ci">def</span> <span class="cw">tache</span>(<span class="pur">nom</span>: <span class="ci">str</span>):
+    <span class="cw">time.sleep</span>(<span class="cor">1</span>)           <span class="cm"># I/O simulé (libère le GIL)</span>
+    <span class="cw">print</span>(<span class="cs">f"[{<span class="pur">nom</span>}] terminé"</span>)
+
+<span class="pur">t1</span> = <span class="pur">threading</span>.<span class="cw">Thread</span>(<span class="ci">target</span>=<span class="cw">tache</span>, <span class="ci">args</span>=(<span class="cs">"A"</span>,))
+<span class="pur">t2</span> = <span class="pur">threading</span>.<span class="cw">Thread</span>(<span class="ci">target</span>=<span class="cw">tache</span>, <span class="ci">args</span>=(<span class="cs">"B"</span>,))
+<span class="pur">t1</span>.<span class="cs">start</span>(); <span class="pur">t2</span>.<span class="cs">start</span>()
+<span class="pur">t1</span>.<span class="cs">join</span>();  <span class="pur">t2</span>.<span class="cs">join</span>()    <span class="cm"># attendre la fin</span>
+
+<span class="cm"># ── asyncio : coroutines, 1 thread, event loop ────────────</span>
+<span class="ci">import</span> <span class="pur">asyncio</span>
+
+<span class="ci">async def</span> <span class="cw">recuperer</span>(<span class="pur">url</span>: <span class="ci">str</span>) -> <span class="ci">str</span>:
+    <span class="ci">await</span> <span class="pur">asyncio</span>.<span class="cw">sleep</span>(<span class="cor">1</span>)    <span class="cm"># ✓ non-bloquant</span>
+    <span class="ci">return</span> <span class="cs">f"données:{<span class="pur">url</span>}"</span>
+
+<span class="ci">async def</span> <span class="cw">main</span>():
+    <span class="cm"># Lance 3 coroutines en "parallèle"</span>
+    <span class="pur">resultats</span> = <span class="ci">await</span> <span class="pur">asyncio</span>.<span class="cw">gather</span>(
+        <span class="cw">recuperer</span>(<span class="cs">"api/a"</span>),
+        <span class="cw">recuperer</span>(<span class="cs">"api/b"</span>),
+        <span class="cw">recuperer</span>(<span class="cs">"api/c"</span>),    <span class="cm"># ~1s total !</span>
+    )
+
+<span class="pur">asyncio</span>.<span class="cw">run</span>(<span class="cw">main</span>())
+
+<span class="cm"># ── multiprocessing : vrai parallélisme CPU ───────────────</span>
+<span class="ci">from</span> <span class="pur">multiprocessing</span> <span class="ci">import</span> <span class="cw">Pool</span>
+<span class="ci">with</span> <span class="cw">Pool</span>(<span class="cor">4</span>) <span class="ci">as</span> <span class="pur">p</span>:              <span class="cm"># 4 processus</span>
+    <span class="pur">res</span> = <span class="pur">p</span>.<span class="cw">map</span>(<span class="cw">calcul</span>, <span class="pur">donnees</span>) <span class="cm"># contourne le GIL</span></pre>
+        <hr class="sep">
+        <div style="font-size:11px;color:var(--muted);line-height:1.7">
+          <span class="cw">GIL</span> (Global Interpreter Lock) : 1 seul thread Python actif à la fois sur le CPU.<br>
+          <span class="ci">asyncio.gather()</span> → concurrent (pas vrai //), idéal pour I/O.<br>
+          CPU-bound → <span class="pur">multiprocessing</span> (processus séparés, pas de GIL).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════ SECTION 4 : C pthreads -->
+  <div class="sec g2">
+
+    <!-- C pthread_create/join -->
+    <div>
+      <p class="sl">④ Langage C — POSIX Threads (pthreads) · gcc -pthread</p>
+      <div class="card2">
+<pre><span class="cm">/* Compilation : gcc -Wall -pthread -o prog prog.c */</span>
+<span class="ci">#include</span> <span class="cs">&lt;pthread.h&gt;</span>
+<span class="ci">#include</span> <span class="cs">&lt;stdio.h&gt;</span>
+<span class="ci">#include</span> <span class="cs">&lt;stdlib.h&gt;</span>
+
+<span class="cm">/* Signature obligatoire : void* f(void* arg) */</span>
+<span class="ci">void</span>* <span class="cw">tache</span>(<span class="ci">void</span>* <span class="pur">arg</span>) {
+    <span class="ci">int</span> <span class="pur">id</span> = *(<span class="ci">int</span>*)<span class="pur">arg</span>;          <span class="cm">// cast du pointeur</span>
+    <span class="cw">printf</span>(<span class="cs">"Thread %d démarre\n"</span>, <span class="pur">id</span>);
+    <span class="cm">/* travail ici... */</span>
+    <span class="ci">return</span> (<span class="ci">void</span>*)<span class="cor">0</span>;              <span class="cm">// valeur de retour</span>
+}
+
+<span class="ci">int</span> <span class="cw">main</span>(<span class="ci">void</span>) {
+    <span class="pur">pthread_t</span> <span class="pur">t1</span>, <span class="pur">t2</span>;
+    <span class="ci">int</span> <span class="pur">id1</span> = <span class="cor">1</span>, <span class="pur">id2</span> = <span class="cor">2</span>;
+
+    <span class="cm">/* Création — non-bloquant */</span>
+    <span class="cw">pthread_create</span>(&<span class="pur">t1</span>, <span class="ci">NULL</span>, <span class="cw">tache</span>, &<span class="pur">id1</span>);
+    <span class="cw">pthread_create</span>(&<span class="pur">t2</span>, <span class="ci">NULL</span>, <span class="cw">tache</span>, &<span class="pur">id2</span>);
+
+    <span class="cm">/* Attente de fin (bloquant pour main) */</span>
+    <span class="cw">pthread_join</span>(<span class="pur">t1</span>, <span class="ci">NULL</span>);   <span class="cm">// attendre t1</span>
+    <span class="cw">pthread_join</span>(<span class="pur">t2</span>, <span class="ci">NULL</span>);   <span class="cm">// attendre t2</span>
+
+    <span class="cw">printf</span>(<span class="cs">"Tous les threads terminés\n"</span>);
+    <span class="ci">return</span> <span class="cor">0</span>;
+}</pre>
+        <hr class="sep">
+        <div style="font-size:11px;color:var(--muted);line-height:1.7">
+          <code class="ci">pthread_create()</code> : crée un thread OS réel (pas une coroutine).<br>
+          <code class="ci">pthread_join()</code> : attend la fin + récupère la valeur de retour.<br>
+          Chaque thread a sa propre <span class="cw">pile</span> mais partage le <span class="cw">tas (heap)</span> et les globaux.
+        </div>
+      </div>
+    </div>
+
+    <!-- C Mutex + primitives -->
+    <div>
+      <p class="sl">④ Langage C — Mutex, Section critique &amp; Primitives de sync</p>
+      <div class="card2">
+<pre><span class="ci">#include</span> <span class="cs">&lt;pthread.h&gt;</span>
+
+<span class="cm">/* ── Mutex (exclusion mutuelle) ─────────────── */</span>
+<span class="pur">pthread_mutex_t</span> <span class="pur">verrou</span> = <span class="cs">PTHREAD_MUTEX_INITIALIZER</span>;
+<span class="ci">int</span> <span class="pur">compteur</span> = <span class="cor">0</span>;            <span class="cm">// ressource partagée</span>
+
+<span class="ci">void</span>* <span class="cw">incrementer</span>(<span class="ci">void</span>* <span class="pur">_</span>) {
+    <span class="ci">for</span> (<span class="ci">int</span> <span class="pur">i</span> = <span class="cor">0</span>; <span class="pur">i</span> &lt; <span class="cor">100000</span>; <span class="pur">i</span>++) {
+        <span class="cw">pthread_mutex_lock</span>(&<span class="pur">verrou</span>);   <span class="cm">// ← LOCK</span>
+        <span class="pur">compteur</span>++;                    <span class="cm">// section critique</span>
+        <span class="cw">pthread_mutex_unlock</span>(&<span class="pur">verrou</span>); <span class="cm">// ← UNLOCK</span>
+    }
+    <span class="ci">return</span> <span class="ci">NULL</span>;
+}
+<span class="cm">/* ── Variable condition (signal inter-threads) ─ */</span>
+<span class="pur">pthread_cond_t</span>  <span class="pur">cond</span>  = <span class="cs">PTHREAD_COND_INITIALIZER</span>;
+<span class="cw">pthread_cond_wait</span>(&<span class="pur">cond</span>, &<span class="pur">verrou</span>);   <span class="cm">// attendre signal</span>
+<span class="cw">pthread_cond_signal</span>(&<span class="pur">cond</span>);          <span class="cm">// réveiller 1</span>
+<span class="cw">pthread_cond_broadcast</span>(&<span class="pur">cond</span>);       <span class="cm">// réveiller tous</span>
+
+<span class="cm">/* ── Sémaphore POSIX ─────────────────────────── */</span>
+<span class="ci">#include</span> <span class="cs">&lt;semaphore.h&gt;</span>
+<span class="pur">sem_t</span> <span class="pur">sem</span>;
+<span class="cw">sem_init</span>(&<span class="pur">sem</span>, <span class="cor">0</span>, <span class="cor">3</span>);   <span class="cm">// 3 accès simultanés max</span>
+<span class="cw">sem_wait</span>(&<span class="pur">sem</span>);         <span class="cm">// P() — décrémenter</span>
+<span class="cw">sem_post</span>(&<span class="pur">sem</span>);         <span class="cm">// V() — incrémenter</span></pre>
+        <hr class="sep">
+        <div style="font-size:11px;color:var(--muted);line-height:1.7">
+          Sans mutex : <code class="cd">compteur++</code> = 3 instructions ASM → <span class="cd">race condition garantie</span>.<br>
+          <span class="cp">Deadlock</span> : T1 attend verrou de T2 qui attend verrou de T1 → toujours verrouiller dans le <span class="cw">même ordre</span>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════ SECTION 5 : TABLEAU CROSS-LANGUAGE -->
+  <div class="sec">
+    <p class="sl">⑤ Tableau comparatif cross-langage — Syntaxe &amp; Concepts</p>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:16%">Concept</th>
+            <th style="width:28%"><span class="cw">● JavaScript (Node.js)</span></th>
+            <th style="width:28%"><span class="ci">● Python 3</span></th>
+            <th style="width:28%"><span class="pur">● C (pthreads / POSIX)</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cm">Créer un thread</td>
+            <td><code class="cw">new Worker('./w.js')</code> <code class="cm">// Worker isolé</code></td>
+            <td><code class="ci">threading.Thread(target=f, args=(x,))</code></td>
+            <td><code class="pur">pthread_create(&amp;t, NULL, f, arg)</code></td>
+          </tr>
+          <tr>
+            <td class="cm">Démarrer le thread</td>
+            <td><code class="cm">// automatique à la création</code></td>
+            <td><code class="ci">t.start()</code></td>
+            <td><code class="cm">// automatique à pthread_create</code></td>
+          </tr>
+          <tr>
+            <td class="cm">Attendre fin</td>
+            <td><code class="cw">worker.on('exit', cb)</code></td>
+            <td><code class="ci">t.join()</code></td>
+            <td><code class="pur">pthread_join(t, NULL)</code></td>
+          </tr>
+          <tr>
+            <td class="cm">Fonction async</td>
+            <td><code class="cs">async function f() { ... }</code></td>
+            <td><code class="ci">async def f(): ...</code></td>
+            <td><code class="cd">N/A natif</code> <code class="cm">// libuv / libevent</code></td>
+          </tr>
+          <tr>
+            <td class="cm">Attendre une valeur async</td>
+            <td><code class="cs">const v = await promesse</code></td>
+            <td><code class="ci">v = await coroutine</code></td>
+            <td><code class="cd">—</code> <code class="cm">// pas de support natif</code></td>
+          </tr>
+          <tr>
+            <td class="cm">Lancer l'event loop</td>
+            <td><code class="cm">Automatique (runtime Node.js)</code></td>
+            <td><code class="ci">asyncio.run(main())</code></td>
+            <td><code class="pur">uv_run(loop, UV_RUN_DEFAULT)</code> <code class="cm">(libuv)</code></td>
+          </tr>
+          <tr>
+            <td class="cm">Parallelisme async</td>
+            <td><code class="cs">await Promise.all([p1, p2, p3])</code></td>
+            <td><code class="ci">await asyncio.gather(c1, c2, c3)</code></td>
+            <td><code class="pur">N × pthread_create()</code></td>
+          </tr>
+          <tr>
+            <td class="cm">Mutex / Verrou</td>
+            <td><code class="cw">SharedArrayBuffer + Atomics</code></td>
+            <td><code class="ci">lock = threading.Lock()</code> <code class="ci">lock.acquire()</code></td>
+            <td><code class="pur">pthread_mutex_lock(&amp;m)</code></td>
+          </tr>
+          <tr>
+            <td class="cm">File de messages</td>
+            <td><code class="cw">worker.postMessage(data)</code></td>
+            <td><code class="ci">q = queue.Queue()</code> <code class="ci">q.put() / q.get()</code></td>
+            <td><code class="pur">pipe() / sem_t / mq_open()</code></td>
+          </tr>
+          <tr>
+            <td class="cm">Gestion erreur</td>
+            <td><code class="cs">try { await ... } catch(e) { }</code></td>
+            <td><code class="ci">try: await ... except Exc as e:</code></td>
+            <td><code class="pur">retour int errno / perror()</code></td>
+          </tr>
+          <tr>
+            <td class="cm">CPU-bound</td>
+            <td><code class="cd">Worker Threads (mémoire isolée)</code></td>
+            <td><code class="cd">multiprocessing.Pool (GIL !)</code></td>
+            <td><code class="cs">Natif (vrai multi-core)</code></td>
+          </tr>
+          <tr>
+            <td class="cm">I/O-bound</td>
+            <td><code class="cs">async/await natif (event loop)</code></td>
+            <td><code class="cs">asyncio (idéal) ou threading</code></td>
+            <td><code class="cw">select() / epoll() + threads</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════ SECTION 6 : PIÈGES + QUAND + LEXIQUE -->
+  <div class="sec g3">
+
+    <!-- Anti-patterns -->
+    <div>
+      <p class="sl">⑥ Anti-patterns &amp; Pièges courants</p>
+      <div class="card">
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;gap:7px;align-items:flex-start">
+            <span class="badge bw" style="min-width:24px;justify-content:center;flex-shrink:0">JS</span>
+            <span style="font-size:11px;color:var(--muted)"><span class="cp">Callback Hell</span> — imbrication illimitée. Fix : <code class="cs">async/await</code>.</span>
+          </div>
+          <div style="display:flex;gap:7px;align-items:flex-start">
+            <span class="badge bw" style="min-width:24px;justify-content:center;flex-shrink:0">JS</span>
+            <span style="font-size:11px;color:var(--muted)"><span class="cp">await en for…of</span> — séquentiel ! Fix : <code class="cs">Promise.all(arr.map(f))</code>.</span>
+          </div>
+          <div style="display:flex;gap:7px;align-items:flex-start">
+            <span class="badge bw" style="min-width:24px;justify-content:center;flex-shrink:0">JS</span>
+            <span style="font-size:11px;color:var(--muted)"><span class="cp">Promise non gérée</span> — <code class="cd">UnhandledRejection</code>. Toujours <code class="ci">.catch()</code> ou <code class="ci">try/catch</code>.</span>
+          </div>
+          <div style="display:flex;gap:7px;align-items:flex-start">
+            <span class="badge bi" style="min-width:24px;justify-content:center;flex-shrink:0">Py</span>
+            <span style="font-size:11px;color:var(--muted)"><span class="cp">GIL oublié</span> — <code>threading</code> ne parallélise pas le CPU. Fix : <code class="ci">multiprocessing</code>.</span>
+          </div>
+          <div style="display:flex;gap:7px;align-items:flex-start">
+            <span class="badge bi" style="min-width:24px;justify-content:center;flex-shrink:0">Py</span>
+            <span style="font-size:11px;color:var(--muted)"><span class="cp">time.sleep() dans async</span> — bloque l'event loop. Fix : <code class="ci">await asyncio.sleep()</code>.</span>
+          </div>
+          <div style="display:flex;gap:7px;align-items:flex-start">
+            <span class="badge bi" style="min-width:24px;justify-content:center;flex-shrink:0">Py</span>
+            <span style="font-size:11px;color:var(--muted)"><span class="cp">threading.Lock() oublié</span> — variable partagée corrompue. Toujours protéger.</span>
+          </div>
+          <div style="display:flex;gap:7px;align-items:flex-start">
+            <span class="badge bp" style="min-width:24px;justify-content:center;flex-shrink:0">C</span>
+            <span style="font-size:11px;color:var(--muted)"><span class="cp">Race condition</span> — accès concurrent sans mutex → UB. Toujours <code class="pur">mutex_lock</code>.</span>
+          </div>
+          <div style="display:flex;gap:7px;align-items:flex-start">
+            <span class="badge bp" style="min-width:24px;justify-content:center;flex-shrink:0">C</span>
+            <span style="font-size:11px;color:var(--muted)"><span class="cp">Deadlock</span> — T1 attend T2 qui attend T1. Fix : toujours verrouiller dans le même ordre.</span>
+          </div>
+          <div style="display:flex;gap:7px;align-items:flex-start">
+            <span class="badge bp" style="min-width:24px;justify-content:center;flex-shrink:0">C</span>
+            <span style="font-size:11px;color:var(--muted)"><span class="cp">Thread leak</span> — thread jamais joint ni détaché. Fix : <code class="pur">pthread_join()</code> ou <code class="pur">pthread_detach()</code>.</span>
+          </div>
+          <div style="display:flex;gap:7px;align-items:flex-start">
+            <span class="badge bg" style="min-width:24px;justify-content:center;flex-shrink:0">∀</span>
+            <span style="font-size:11px;color:var(--muted)"><span class="cp">Variable locale partagée</span> — passer des pointeurs vers des locales détruites après return = UB.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quand utiliser -->
+    <div>
+      <p class="sl">⑥ Quand utiliser quel modèle ?</p>
+      <div class="card">
+        <table>
+          <thead><tr><th>Cas d'usage</th><th>Modèle recommandé</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cm">Requêtes HTTP / API REST multiples</td>
+              <td><span class="cs">async/await + gather/all</span></td>
+            </tr>
+            <tr>
+              <td class="cm">Calcul intensif (chiffrement, ML)</td>
+              <td><span class="pur">multiprocessing · threads C</span></td>
+            </tr>
+            <tr>
+              <td class="cm">Serveur web haute performance</td>
+              <td><span class="cs">Node.js async · FastAPI asyncio</span></td>
+            </tr>
+            <tr>
+              <td class="cm">Interface graphique (GUI / Tkinter)</td>
+              <td><span class="cw">Thread séparé pour les I/O</span></td>
+            </tr>
+            <tr>
+              <td class="cm">Système embarqué temps réel</td>
+              <td><span class="pur">pthreads C · FreeRTOS tasks</span></td>
+            </tr>
+            <tr>
+              <td class="cm">Script séquentiel simple (CLI)</td>
+              <td><span class="cm">Mono-thread suffit</span></td>
+            </tr>
+            <tr>
+              <td class="cm">WebSocket / SSE (push serveur)</td>
+              <td><span class="cs">async I/O natif</span></td>
+            </tr>
+            <tr>
+              <td class="cm">Lecture/écriture de nombreux fichiers</td>
+              <td><span class="cw">threads I/O · async</span></td>
+            </tr>
+            <tr>
+              <td class="cm">Mémoire partagée entre tâches</td>
+              <td><span class="pur">threads + mutex</span></td>
+            </tr>
+            <tr>
+              <td class="cm">Isolation totale (sécurité)</td>
+              <td><span class="cw">Worker / multiprocessing</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Lexique -->
+    <div>
+      <p class="sl">⑥ Lexique essentiel</p>
+      <div class="card">
+        <table>
+          <thead><tr><th style="width:38%">Terme</th><th>Définition</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="ci" style="font-size:11px">Coroutine</td>
+              <td class="cm" style="font-size:11px">Fonction suspendable / reprise via <code>await</code></td>
+            </tr>
+            <tr>
+              <td class="ci" style="font-size:11px">Event Loop</td>
+              <td class="cm" style="font-size:11px">Boucle qui dispatche les callbacks et coroutines</td>
+            </tr>
+            <tr>
+              <td class="cw" style="font-size:11px">Promise / Future</td>
+              <td class="cm" style="font-size:11px">Valeur async future (pending → fulfilled/rejected)</td>
+            </tr>
+            <tr>
+              <td class="pur" style="font-size:11px">Thread (OS)</td>
+              <td class="cm" style="font-size:11px">Fil d'exécution géré par l'OS, mémoire partagée</td>
+            </tr>
+            <tr>
+              <td class="pur" style="font-size:11px">Mutex</td>
+              <td class="cm" style="font-size:11px">Verrou exclusif — 1 seul thread dans la section critique</td>
+            </tr>
+            <tr>
+              <td class="pur" style="font-size:11px">Sémaphore</td>
+              <td class="cm" style="font-size:11px">Compteur — limite N accès simultanés à une ressource</td>
+            </tr>
+            <tr>
+              <td class="cd" style="font-size:11px">Race condition</td>
+              <td class="cm" style="font-size:11px">Résultat dépend de l'ordre d'exécution imprévisible</td>
+            </tr>
+            <tr>
+              <td class="cd" style="font-size:11px">Deadlock</td>
+              <td class="cm" style="font-size:11px">Blocage mutuel — 2 threads s'attendent indéfiniment</td>
+            </tr>
+            <tr>
+              <td class="cw" style="font-size:11px">GIL (Python)</td>
+              <td class="cm" style="font-size:11px">Verrou global CPython — 1 thread Python actif max / CPU</td>
+            </tr>
+            <tr>
+              <td class="cs" style="font-size:11px">Microtask</td>
+              <td class="cm" style="font-size:11px">Promise.then() JS — exécutée avant la prochaine macrotask</td>
+            </tr>
+            <tr>
+              <td class="cm" style="font-size:11px">Macrotask</td>
+              <td class="cm" style="font-size:11px">setTimeout / setInterval / I/O cb — après microtasks</td>
+            </tr>
+            <tr>
+              <td class="cm" style="font-size:11px">Section critique</td>
+              <td class="cm" style="font-size:11px">Zone de code ne devant être exécutée que par 1 thread</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ FOOTER -->
+  <div class="footer">
+    <span>BTS CIEL · Lycée Polyvalent Newton-ENREA · Argenteuil</span>
+    <span>JavaScript ES2017+ · Python 3.11+ · C11 · POSIX.1-2017 (IEEE Std 1003.1) · pthreads</span>
+    <span>newtonformationsnir.fr</span>
+  </div>
+
+</div>
+</body>
+</html>

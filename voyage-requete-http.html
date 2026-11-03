@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Voyage de la Requête HTTP</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+:root{
+  --bg:#0a0e14;--s1:#111720;--s2:#1a2030;--s3:#222c3a;
+  --border:#2a3545;--text:#dce8f5;--muted:#6b8099;
+  --blue:#4fa3f7;--cyan:#38d9c0;--orange:#f5923e;
+  --green:#45d97e;--red:#f05c5c;--purple:#b07ef8;--yellow:#f0c94a;
+  --mono:'JetBrains Mono',monospace;--title:'Syne',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;padding:20px 12px 40px;
+  background-image:radial-gradient(ellipse at 20% 0%,rgba(79,163,247,.06) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 100%,rgba(56,217,192,.05) 0%,transparent 50%);}
+
+/* ── Header ── */
+header{text-align:center;margin-bottom:20px;}
+header h1{font-family:var(--title);font-size:1.45rem;font-weight:800;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.3px;}
+header p{color:var(--muted);font-size:.72rem;margin-top:3px;}
+
+/* ── Phase timeline ── */
+.timeline{display:flex;align-items:center;gap:0;margin-bottom:18px;
+  width:100%;max-width:860px;padding:0 4px;}
+.tphase{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;position:relative;}
+.tphase:not(:last-child)::after{content:'';position:absolute;top:13px;left:60%;width:80%;height:2px;
+  background:var(--border);z-index:0;transition:background .5s;}
+.tphase.done:not(:last-child)::after{background:var(--green);}
+.tphase.active:not(:last-child)::after{background:var(--blue);}
+.t-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);
+  background:var(--s2);display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;z-index:1;transition:all .4s;position:relative;}
+.tphase.done .t-dot{border-color:var(--green);background:rgba(69,217,126,.15);color:var(--green);}
+.tphase.active .t-dot{border-color:var(--blue);background:rgba(79,163,247,.15);
+  color:var(--blue);box-shadow:0 0 12px rgba(79,163,247,.3);}
+.t-label{font-size:.58rem;color:var(--muted);text-align:center;line-height:1.3;max-width:70px;
+  transition:color .4s;}
+.tphase.active .t-label{color:var(--blue);}
+.tphase.done .t-label{color:var(--green);}
+
+/* ── Main stage ── */
+.stage{width:100%;max-width:860px;background:var(--s1);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;}
+
+/* ── Network lane ── */
+.net-lane{display:grid;grid-template-columns:200px 1fr 200px;gap:0;
+  padding:16px 16px 0;align-items:start;min-height:180px;}
+
+.actor-card{background:var(--s2);border:1.5px solid var(--border);border-radius:10px;
+  padding:12px;text-align:center;transition:border-color .4s,box-shadow .4s;}
+.actor-card.hl-blue{border-color:var(--blue);box-shadow:0 0 18px rgba(79,163,247,.2);}
+.actor-card.hl-green{border-color:var(--green);box-shadow:0 0 18px rgba(69,217,126,.2);}
+.actor-card.hl-orange{border-color:var(--orange);box-shadow:0 0 18px rgba(245,146,62,.2);}
+.actor-icon{font-size:1.8rem;margin-bottom:4px;}
+.actor-name{font-family:var(--title);font-size:.72rem;font-weight:700;color:var(--text);}
+.actor-sub{font-size:.6rem;color:var(--muted);}
+
+/* ── Travel path ── */
+.path-area{position:relative;display:flex;align-items:center;padding:0 8px;height:180px;}
+.path-line{position:absolute;left:0;right:0;height:2px;top:50%;transform:translateY(-50%);
+  background:var(--border);border-radius:2px;}
+.path-fill{position:absolute;left:0;width:0;height:2px;top:50%;transform:translateY(-50%);
+  border-radius:2px;transition:width 1.1s cubic-bezier(.4,0,.2,1);}
+.path-fill.to-right{background:linear-gradient(90deg,var(--blue),var(--cyan));}
+.path-fill.to-left{right:0;left:auto;background:linear-gradient(270deg,var(--green),var(--cyan));}
+.path-fill.to-left{width:0;right:0;left:auto;}
+
+/* Packet */
+.packet-obj{position:absolute;top:50%;transform:translateY(-50%);
+  background:var(--s2);border:1.5px solid var(--blue);border-radius:8px;
+  padding:5px 10px;font-size:.62rem;white-space:nowrap;opacity:0;
+  transition:left .0s,right .0s,opacity .3s;pointer-events:none;z-index:5;
+  box-shadow:0 0 12px rgba(79,163,247,.25);}
+.packet-obj.go-right{border-color:var(--blue);color:var(--cyan);}
+.packet-obj.go-left{border-color:var(--green);color:var(--green);}
+.packet-obj.visible{opacity:1;}
+
+/* Server processing steps */
+.srv-steps{display:flex;flex-direction:column;gap:5px;padding:8px 0 0;}
+.srv-step{background:var(--s3);border:1px solid var(--border);border-radius:6px;
+  padding:6px 10px;font-size:.62rem;color:var(--muted);display:flex;align-items:center;gap:6px;
+  opacity:.3;transition:all .4s;}
+.srv-step.active{opacity:1;border-color:var(--orange);color:var(--orange);
+  background:rgba(245,146,62,.06);}
+.srv-step.done{opacity:1;border-color:var(--green);color:var(--green);
+  background:rgba(69,217,126,.05);}
+.srv-step-icon{font-size:.85rem;}
+
+/* ── HTTP message panel ── */
+.msg-area{padding:12px 16px 16px;border-top:1px solid var(--border);margin-top:0;}
+.msg-header-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.msg-badge{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.5px;}
+.msg-badge.req{background:rgba(79,163,247,.15);color:var(--blue);border:1px solid var(--blue);}
+.msg-badge.res{background:rgba(69,217,126,.15);color:var(--green);border:1px solid var(--green);}
+.msg-title{font-family:var(--title);font-size:.78rem;font-weight:700;color:var(--muted);}
+
+.http-msg{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;
+  font-size:.68rem;line-height:1.7;min-height:108px;position:relative;}
+.http-line{display:flex;gap:8px;align-items:baseline;opacity:0;transform:translateY(4px);
+  transition:opacity .35s,transform .35s;}
+.http-line.show{opacity:1;transform:none;}
+.lbl{min-width:80px;color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:.5px;
+  padding-top:1px;}
+.hl-method{color:var(--blue);font-weight:700;}
+.hl-url{color:var(--cyan);}
+.hl-ver{color:var(--muted);}
+.hl-hkey{color:var(--orange);}
+.hl-hval{color:var(--text);}
+.hl-body-key{color:var(--purple);}
+.hl-body-val{color:var(--yellow);}
+.hl-status-ok{color:var(--green);font-weight:700;}
+.hl-status-err{color:var(--red);font-weight:700;}
+.hl-res-hkey{color:var(--cyan);}
+.hl-res-hval{color:var(--text);}
+.section-sep{width:100%;height:1px;background:var(--border);margin:4px 0;opacity:0;transition:opacity .3s;}
+.section-sep.show{opacity:1;}
+
+/* annotation bubbles */
+.annot{display:inline-block;background:var(--s3);border:1px solid var(--border);
+  border-radius:5px;padding:2px 7px;font-size:.58rem;color:var(--muted);margin-left:8px;
+  opacity:0;transition:opacity .3s .2s;vertical-align:middle;}
+.http-line.show .annot{opacity:1;}
+.annot.c-blue{color:var(--blue);border-color:rgba(79,163,247,.4);}
+.annot.c-orange{color:var(--orange);border-color:rgba(245,146,62,.4);}
+.annot.c-green{color:var(--green);border-color:rgba(69,217,126,.4);}
+.annot.c-purple{color:var(--purple);border-color:rgba(176,126,248,.4);}
+
+/* phase label */
+.phase-label{font-size:.62rem;color:var(--muted);padding:0 0 6px;letter-spacing:.3px;}
+
+/* ── Controls ── */
+.controls{display:flex;gap:10px;margin-top:18px;justify-content:center;}
+.btn{padding:9px 24px;border-radius:8px;border:1.5px solid var(--border);
+  background:var(--s2);color:var(--text);font-family:var(--mono);font-size:.8rem;
+  font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.3px;}
+.btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(79,163,247,.07);}
+.btn.primary{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#0a0e14;
+  border:none;font-weight:700;}
+.btn.primary:hover{filter:brightness(1.1);}
+.btn:disabled{opacity:.35;cursor:default;pointer-events:none;}
+
+/* progress caption */
+.step-caption{text-align:center;font-size:.68rem;color:var(--blue);margin-top:10px;
+  min-height:20px;letter-spacing:.2px;transition:opacity .3s;}
+
+/* data flow indicator on path */
+.flow-arrow{position:absolute;top:50%;font-size:.9rem;opacity:0;transition:opacity .2s;
+  transform:translateY(-50%);pointer-events:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✈ Le Voyage de la Requête HTTP</h1>
+  <p>De la construction au navigateur — anatomie complète</p>
+</header>
+
+<!-- Timeline -->
+<div class="timeline" id="timeline">
+  <div class="tphase active" id="tp-0">
+    <div class="t-dot">1</div>
+    <div class="t-label">Construction requête</div>
+  </div>
+  <div class="tphase" id="tp-1">
+    <div class="t-dot">2</div>
+    <div class="t-label">Envoi au serveur</div>
+  </div>
+  <div class="tphase" id="tp-2">
+    <div class="t-dot">3</div>
+    <div class="t-label">Traitement serveur</div>
+  </div>
+  <div class="tphase" id="tp-3">
+    <div class="t-dot">4</div>
+    <div class="t-label">Retour réponse</div>
+  </div>
+  <div class="tphase" id="tp-4">
+    <div class="t-dot">5</div>
+    <div class="t-label">Interprétation client</div>
+  </div>
+</div>
+
+<!-- Stage -->
+<div class="stage">
+
+  <!-- Network lane -->
+  <div class="net-lane">
+
+    <!-- Client -->
+    <div class="actor-card hl-blue" id="actor-client">
+      <div class="actor-icon">🖥️</div>
+      <div class="actor-name">Client</div>
+      <div class="actor-sub">Navigateur</div>
+      <div class="actor-sub" style="margin-top:4px;font-size:.58rem;color:var(--muted)">api.example.com</div>
+    </div>
+
+    <!-- Path -->
+    <div class="path-area" id="path-area">
+      <div class="path-line"></div>
+      <div class="path-fill to-right" id="pf-right"></div>
+      <div class="path-fill to-left" id="pf-left" style="width:0;right:0;left:auto;"></div>
+      <div class="packet-obj go-right" id="pkt" style="left:0">📦 Requête HTTP</div>
+    </div>
+
+    <!-- Server -->
+    <div class="actor-card" id="actor-server" style="min-height:160px;">
+      <div class="actor-icon">⚙️</div>
+      <div class="actor-name">Serveur</div>
+      <div class="actor-sub">Node.js / Express</div>
+      <div class="srv-steps" id="srv-steps">
+        <div class="srv-step" id="srv-1">
+          <span class="srv-step-icon">🔍</span>
+          <span>Analyse la requête</span>
+        </div>
+        <div class="srv-step" id="srv-2">
+          <span class="srv-step-icon">🗄️</span>
+          <span>Interroge la BDD</span>
+        </div>
+        <div class="srv-step" id="srv-3">
+          <span class="srv-step-icon">📋</span>
+          <span>Construit la réponse</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /net-lane -->
+
+  <!-- HTTP message panel -->
+  <div class="msg-area">
+    <div class="msg-header-row">
+      <span class="msg-badge req" id="msg-badge">REQUÊTE HTTP</span>
+      <span class="msg-title" id="msg-title">Construction en cours…</span>
+    </div>
+    <div class="http-msg" id="http-msg">
+
+      <!-- REQUEST lines -->
+      <div class="phase-label" id="lbl-req">① Ligne de requête</div>
+      <div class="http-line" id="l-0">
+        <span class="lbl">méthode</span>
+        <span>
+          <span class="hl-method">GET</span>
+          <span class="hl-url"> /api/users</span>
+          <span class="hl-ver"> HTTP/1.1</span>
+          <span class="annot c-blue">méthode + ressource + version</span>
+        </span>
+      </div>
+
+      <div class="section-sep" id="sep-1"></div>
+      <div class="phase-label" id="lbl-hdr" style="opacity:0;transition:opacity .3s">② En-têtes (Headers)</div>
+
+      <div class="http-line" id="l-1">
+        <span class="lbl">host</span>
+        <span><span class="hl-hkey">Host:</span> <span class="hl-hval">api.example.com</span>
+          <span class="annot c-orange">serveur ciblé</span></span>
+      </div>
+      <div class="http-line" id="l-2">
+        <span class="lbl">agent</span>
+        <span><span class="hl-hkey">User-Agent:</span> <span class="hl-hval">Mozilla/5.0</span>
+          <span class="annot c-orange">client utilisé</span></span>
+      </div>
+      <div class="http-line" id="l-3">
+        <span class="lbl">accept</span>
+        <span><span class="hl-hkey">Accept:</span> <span class="hl-hval">application/json</span>
+          <span class="annot c-orange">format attendu</span></span>
+      </div>
+      <div class="http-line" id="l-4">
+        <span class="lbl">auth</span>
+        <span><span class="hl-hkey">Authorization:</span> <span class="hl-hval">Bearer eyJhbGci…</span>
+          <span class="annot c-orange">identité / droits</span></span>
+      </div>
+      <div class="http-line" id="l-5">
+        <span class="lbl">origin</span>
+        <span><span class="hl-hkey">Origin:</span> <span class="hl-hval">https://monsite.com</span>
+          <span class="annot" style="color:var(--cyan);border-color:rgba(56,217,192,.4)">sécurité CORS</span></span>
+      </div>
+
+      <div class="section-sep" id="sep-2"></div>
+      <div class="phase-label" id="lbl-body" style="opacity:0;transition:opacity .3s">③ Corps (Body — optionnel pour GET)</div>
+
+      <div class="http-line" id="l-6">
+        <span class="lbl">body</span>
+        <span>
+          <span style="color:var(--muted)">{</span>
+          <span class="hl-body-key"> "username"</span><span style="color:var(--muted)">:</span>
+          <span class="hl-body-val"> "alice"</span><span style="color:var(--muted)">,</span>
+          <span class="hl-body-key"> "scope"</span><span style="color:var(--muted)">:</span>
+          <span class="hl-body-val"> "user_data"</span>
+          <span style="color:var(--muted)"> }</span>
+          <span class="annot c-purple">POST / PUT seulement</span>
+        </span>
+      </div>
+
+      <!-- RESPONSE lines (hidden initially) -->
+      <div class="http-line" id="r-0" style="display:none">
+        <span class="lbl">statut</span>
+        <span><span class="hl-status-ok">HTTP/1.1 200 OK</span>
+          <span class="annot c-green">succès ✓</span></span>
+      </div>
+      <div class="http-line" id="r-1" style="display:none">
+        <span class="lbl">type</span>
+        <span><span class="hl-res-hkey">Content-Type:</span> <span class="hl-res-hval">application/json</span>
+          <span class="annot c-orange">format de la réponse</span></span>
+      </div>
+      <div class="http-line" id="r-2" style="display:none">
+        <span class="lbl">cache</span>
+        <span><span class="hl-res-hkey">Cache-Control:</span> <span class="hl-res-hval">no-cache</span>
+          <span class="annot c-orange">gestion du cache</span></span>
+      </div>
+      <div class="http-line" id="r-3" style="display:none">
+        <span class="lbl">cors</span>
+        <span><span class="hl-res-hkey">Access-Control-Allow-Origin:</span>
+          <span class="hl-res-hval"> https://monsite.com</span>
+          <span class="annot" style="color:var(--cyan);border-color:rgba(56,217,192,.4)">autorisation CORS</span></span>
+      </div>
+      <div class="section-sep" id="sep-r" style="display:none"></div>
+      <div class="http-line" id="r-4" style="display:none">
+        <span class="lbl">body</span>
+        <span>
+          <span style="color:var(--muted)">{</span>
+          <span class="hl-body-key"> "id"</span><span style="color:var(--muted)">:</span>
+          <span class="hl-body-val"> 42</span><span style="color:var(--muted)">,</span>
+          <span class="hl-body-key"> "name"</span><span style="color:var(--muted)">:</span>
+          <span class="hl-body-val"> "Alice"</span><span style="color:var(--muted)">,</span>
+          <span class="hl-body-key"> "role"</span><span style="color:var(--muted)">:</span>
+          <span class="hl-body-val"> "admin"</span>
+          <span style="color:var(--muted)"> }</span>
+          <span class="annot c-green">données JSON parsées ✓</span>
+        </span>
+      </div>
+
+    </div><!-- /http-msg -->
+  </div><!-- /msg-area -->
+
+</div><!-- /stage -->
+
+<div class="step-caption" id="caption">Cliquez sur "Étape suivante" pour commencer le voyage</div>
+
+<div class="controls">
+  <button class="btn" onclick="resetAll()">↺ Recommencer</button>
+  <button class="btn primary" id="btn-next" onclick="advance()">▶ Étape suivante</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+
+// State
+let step=0, busy=false;
+
+// Sub-steps definition
+// Each entry: { phase: 0-4, action: fn, caption: string }
+const steps=[
+  // Phase 0 — Construction
+  {phase:0,caption:"① Ligne de requête : méthode GET + ressource + version HTTP/1.1",
+    fn:()=>{show('l-0'); hlActor('actor-client','hl-blue');}},
+  {phase:0,caption:"② En-têtes : Host, User-Agent, Accept — les métadonnées du client",
+    fn:()=>{
+      $('sep-1').classList.add('show');
+      $('lbl-hdr').style.opacity='1';
+      setTimeout(()=>show('l-1'),0);
+      setTimeout(()=>show('l-2'),200);
+      setTimeout(()=>show('l-3'),400);
+    }},
+  {phase:0,caption:"② En-têtes : Authorization (identité) et Origin (sécurité CORS)",
+    fn:()=>{
+      setTimeout(()=>show('l-4'),0);
+      setTimeout(()=>show('l-5'),250);
+    }},
+  {phase:0,caption:"③ Corps (Body) : données envoyées — uniquement pour POST / PUT",
+    fn:()=>{
+      $('sep-2').classList.add('show');
+      $('lbl-body').style.opacity='1';
+      setTimeout(()=>show('l-6'),100);
+    }},
+
+  // Phase 1 — Envoi
+  {phase:1,caption:"📡 La requête complète est empaquetée et envoyée vers le serveur…",
+    fn:()=>{
+      hlActor('actor-client','hl-blue');
+      $('msg-title').textContent='Transmission en cours…';
+      // Animate packet right
+      const pkt=$('pkt');
+      pkt.textContent='📦 GET /api/users';
+      pkt.className='packet-obj go-right visible';
+      pkt.style.left='0%';
+      pkt.style.transform='translateY(-50%)';
+      const pf=$('pf-right');
+      pf.style.width='0';
+      setTimeout(()=>{pf.style.width='100%'; animPacket(pkt,'left',0,100,1100);},50);
+      setTimeout(()=>{
+        pkt.style.opacity='0';
+        hlActor('actor-server','hl-orange');
+        $('msg-title').textContent='Requête reçue par le serveur';
+      },1250);
+    }},
+
+  // Phase 2 — Server
+  {phase:2,caption:"🔍 Le serveur analyse la ligne de requête et les en-têtes",
+    fn:()=>{
+      hlActor('actor-server','hl-orange');
+      $('msg-title').textContent='Traitement serveur en cours…';
+      activeSrv('srv-1');
+    }},
+  {phase:2,caption:"🗄️ Routage vers le handler GET /api/users — interrogation de la base de données",
+    fn:()=>{doneSrv('srv-1'); activeSrv('srv-2');}},
+  {phase:2,caption:"📋 Le serveur construit la réponse HTTP : statut + headers + body JSON",
+    fn:()=>{doneSrv('srv-2'); activeSrv('srv-3');}},
+
+  // Phase 3 — Retour
+  {phase:3,caption:"📡 La réponse HTTP repart vers le client…",
+    fn:()=>{
+      doneSrv('srv-3');
+      hlActor('actor-server','hl-green');
+      $('msg-title').textContent='Transmission de la réponse…';
+      const pkt=$('pkt');
+      pkt.textContent='📬 200 OK + JSON';
+      pkt.className='packet-obj go-left visible';
+      pkt.style.left='auto';
+      pkt.style.right='0%';
+      const pf=$('pf-left');
+      pf.style.width='0'; pf.style.right='0';
+      setTimeout(()=>{pf.style.width='100%'; animPacket(pkt,'right',0,100,1100);},50);
+      setTimeout(()=>{
+        pkt.style.opacity='0';
+        hlActor('actor-client','hl-green');
+        $('msg-title').textContent='Réponse reçue par le client';
+      },1250);
+    }},
+
+  // Phase 4 — Interprétation
+  {phase:4,caption:"📥 Le client lit le code de statut : 200 OK — la requête a réussi",
+    fn:()=>{
+      // Switch to response view
+      switchToResponse();
+      setTimeout(()=>show('r-0'),200);
+    }},
+  {phase:4,caption:"📋 Analyse des en-têtes de réponse : Content-Type, Cache-Control, CORS",
+    fn:()=>{
+      setTimeout(()=>show('r-1'),0);
+      setTimeout(()=>show('r-2'),250);
+      setTimeout(()=>show('r-3'),500);
+    }},
+  {phase:4,caption:"✅ Le body JSON est parsé et les données sont disponibles dans le JS !",
+    fn:()=>{
+      $('sep-r').style.display='block';
+      setTimeout(()=>{$('sep-r').classList.add('show');},20);
+      setTimeout(()=>show('r-4'),150);
+      setTimeout(()=>{
+        $('btn-next').disabled=true;
+        $('caption').textContent='🎉 Voyage terminé ! Le client a reçu et interprété la réponse du serveur.';
+        $('caption').style.color='var(--green)';
+      },900);
+    }},
+];
+
+function show(id){
+  const el=$(id);
+  el.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+}
+
+function hlActor(id,cls){
+  const el=$(id);
+  el.className='actor-card '+cls;
+}
+
+function activeSrv(id){$(id).className='srv-step active';}
+function doneSrv(id){$(id).className='srv-step done';}
+
+function setTimeline(phase,state){
+  // mark phases
+  for(let i=0;i<5;i++){
+    const tp=$('tp-'+i);
+    if(i<phase) tp.className='tphase done';
+    else if(i===phase) tp.className='tphase active';
+    else tp.className='tphase';
+  }
+}
+
+function animPacket(el,prop,from,to,dur){
+  let start=null;
+  function step(ts){
+    if(!start) start=ts;
+    const p=Math.min((ts-start)/dur,1);
+    const ease=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+    el.style[prop]=(from+(to-from)*ease)+'%';
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function switchToResponse(){
+  // Hide request lines
+  ['l-0','l-1','l-2','l-3','l-4','l-5','l-6','sep-1','sep-2','lbl-req','lbl-hdr','lbl-body'].forEach(id=>{
+    const el=$(id);
+    if(el){el.style.opacity='0'; el.style.transition='opacity .4s';}
+  });
+  setTimeout(()=>{
+    ['l-0','l-1','l-2','l-3','l-4','l-5','l-6','sep-1','sep-2'].forEach(id=>{
+      const el=$(id); if(el) el.style.display='none';
+    });
+    $('lbl-req').textContent='④ Ligne de statut';
+    $('lbl-req').style.opacity='1'; $('lbl-req').style.display='';
+    $('lbl-hdr').textContent='⑤ En-têtes de réponse'; $('lbl-hdr').style.opacity='1';
+    $('lbl-body').textContent=''; $('lbl-body').style.opacity='0';
+    // Show response lines
+    ['r-0','r-1','r-2','r-3','r-4','sep-r'].forEach(id=>{
+      const el=$(id); if(el){el.style.display='flex'; el.classList.remove('show');}
+    });
+    $('sep-r').style.display='block';
+    $('msg-badge').className='msg-badge res';
+    $('msg-badge').textContent='RÉPONSE HTTP';
+    $('msg-title').textContent='Interprétation par le client…';
+  },450);
+}
+
+function advance(){
+  if(busy) return;
+  if(step>=steps.length) return;
+  busy=true;
+  const s=steps[step];
+  setTimeline(s.phase);
+  $('caption').textContent=s.caption;
+  $('caption').style.color='var(--blue)';
+  s.fn();
+  step++;
+  setTimeout(()=>{ busy=false; },600);
+}
+
+function resetAll(){
+  step=0; busy=false;
+  // Reset actors
+  hlActor('actor-client','hl-blue');
+  $('actor-server').className='actor-card';
+  // Reset srv steps
+  ['srv-1','srv-2','srv-3'].forEach(id=>$(id).className='srv-step');
+  // Reset path
+  $('pf-right').style.width='0';
+  $('pf-left').style.width='0';
+  const pkt=$('pkt'); pkt.className='packet-obj go-right'; pkt.style.left='0'; pkt.style.right='auto';
+  // Reset msg
+  $('msg-badge').className='msg-badge req'; $('msg-badge').textContent='REQUÊTE HTTP';
+  $('msg-title').textContent='Construction en cours…';
+  // Reset all lines
+  const allLines=['l-0','l-1','l-2','l-3','l-4','l-5','l-6','sep-1','sep-2','r-0','r-1','r-2','r-3','r-4','sep-r'];
+  allLines.forEach(id=>{
+    const el=$(id);
+    if(!el) return;
+    el.classList.remove('show');
+    el.style.opacity=''; el.style.transition='';
+    if(['sep-1','sep-2'].includes(id)) el.style.display='';
+    else if(id.startsWith('r-')||id==='sep-r') el.style.display='none';
+    else el.style.display='';
+  });
+  // Reset labels
+  $('lbl-req').textContent='① Ligne de requête'; $('lbl-req').style.opacity='1'; $('lbl-req').style.display='';
+  $('lbl-hdr').textContent='② En-têtes (Headers)'; $('lbl-hdr').style.opacity='0';
+  $('lbl-body').textContent='③ Corps (Body — optionnel pour GET)'; $('lbl-body').style.opacity='0';
+  $('sep-1').classList.remove('show'); $('sep-2').classList.remove('show');
+  // Reset timeline
+  setTimeline(0);
+  // Reset caption
+  $('caption').textContent='Cliquez sur "Étape suivante" pour commencer le voyage';
+  $('caption').style.color='var(--blue)';
+  $('btn-next').disabled=false;
+}
+
+resetAll();
+</script>
+</body>
+</html>

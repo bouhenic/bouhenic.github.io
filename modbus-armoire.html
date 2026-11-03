@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172443">
+  <title>Modbus en images — L'armoire et ses tiroirs</title>
+  <style>
+    :root {
+      --navy:#172443; --ink:#1c2d49; --muted:#60728b; --bg:#f4f7fc; --white:#fff;
+      --blue:#356ce5; --bluep:#edf2ff; --mint:#168969; --mintp:#e6f7ef;
+      --orange:#c77916; --orangep:#fff2dd; --violet:#7852c6; --violetp:#f1ecfc;
+      --border:#dce5f0; --shadow:0 12px 40px rgba(28,51,92,.07);
+    }
+    * {box-sizing:border-box}
+    html {scroll-behavior:smooth}
+    body {margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg);color:var(--ink);line-height:1.48}
+    button {font:inherit;cursor:pointer}
+    button:focus-visible,a:focus-visible {outline:3px solid #ffba49;outline-offset:3px}
+    .shell {max-width:1430px;margin:0 auto;padding:0 25px 34px}
+    header {background:var(--navy);color:#fff}
+    header .shell {display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:16px;padding-bottom:16px}
+    .brand {display:flex;gap:12px;align-items:center;font-weight:850;letter-spacing:.02em;font-size:18px}
+    .brand-icon {display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#6ea7ff,#386bdb);box-shadow:0 5px 16px #0a143e66;font-size:23px}
+    .header-pill {color:#dce7ff;border:1px solid #6e87b8;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700}
+    .hero {display:flex;justify-content:space-between;align-items:end;gap:20px;padding-top:27px;padding-bottom:19px}
+    h1 {font-size:clamp(25px,3vw,36px);line-height:1.13;letter-spacing:-.035em;margin:0 0 9px}
+    .hero p {margin:0;color:var(--muted);font-size:15px;max-width:790px}
+    .hero-tip {display:flex;gap:8px;align-items:center;background:#e6efff;color:#2456a6;border-radius:12px;padding:10px 13px;font-size:12px;white-space:nowrap;font-weight:750}
+    .section-label {font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:850;margin:14px 0 10px}
+    .scenarios {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+    .scenario {position:relative;text-align:left;border:1.5px solid var(--border);background:white;border-radius:15px;padding:13px 11px 12px;min-height:106px;box-shadow:0 3px 10px #17244307;transition:transform .14s,border-color .14s,background .14s}
+    .scenario:hover {transform:translateY(-2px);border-color:#92aae8}
+    .scenario.active {border-color:var(--blue);background:#f1f5ff;box-shadow:0 0 0 2px #356ce520}
+    .scenario .emoji {font-size:23px;display:block;margin-bottom:7px;line-height:1}
+    .scenario strong {font-size:13px;display:block;line-height:1.2}
+    .scenario small {display:block;font-size:11px;color:var(--muted);margin-top:4px;font-weight:600}
+    .scenario.active:after {content:"✓";position:absolute;right:9px;top:8px;color:white;background:var(--blue);border-radius:50%;width:17px;height:17px;text-align:center;font-weight:800;font-size:11px}
+    .lesson-layout {margin-top:17px;display:grid;grid-template-columns:minmax(0,1.48fr) minmax(345px,.72fr);gap:16px;align-items:start}
+    .panel {background:#fff;border:1px solid var(--border);box-shadow:var(--shadow);border-radius:19px;overflow:hidden}
+    .panel-head {padding:15px 19px;display:flex;align-items:center;justify-content:space-between;gap:15px;border-bottom:1px solid var(--border)}
+    .panel-head strong {font-size:15px}
+    .panel-head .soft {font-size:12px;color:var(--muted)}
+    .tag {border-radius:50px;padding:5px 9px;font-size:11px;font-weight:800;white-space:nowrap}
+    .tag.blue {background:var(--bluep);color:#2355ad}.tag.green {background:var(--mintp);color:#187958}
+    .workbench {display:grid;grid-template-columns:minmax(175px,.66fr) minmax(95px,.37fr) minmax(235px,1fr);min-height:435px;gap:7px;align-items:center;padding:17px 17px 19px;background:radial-gradient(ellipse at 35% 48%,#eef4ff,#f9fbff 62%,white 95%)}
+    .pc-panel {display:flex;flex-direction:column;align-items:center;gap:12px;min-width:0}
+    .device-heading {font-size:13px;font-weight:850;color:#263b5a}
+    .monitor {width:100%;max-width:244px;padding:10px;border:7px solid #364a67;border-bottom-width:11px;border-radius:12px;background:#152943;min-height:169px;box-shadow:0 9px 0 -4px #a8b8cd, 0 16px 17px #17244319}
+    .monitor .term {font-size:10px;font-weight:700;color:#b1c9f6;margin-bottom:8px}
+    .monitor-screen {font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;color:#d8e8ff;background:#0d1b2e;border-radius:6px;padding:11px 8px;line-height:1.9;min-height:99px;overflow-wrap:anywhere}
+    .term-row {display:block;white-space:nowrap}
+    .prompt {color:#72dfba}.hex-blue {color:#9bbdff}.hex-green {color:#99efc8}
+    .pc-caption {font-size:11px;color:#60728b;text-align:center}
+    .connection {height:210px;position:relative;align-self:center;display:grid;place-items:center;min-width:0}
+    .line {width:100%;height:3px;position:absolute;top:50%;background:repeating-linear-gradient(90deg,#b4c9ea,#b4c9ea 11px,transparent 11px,transparent 15px);border-radius:10px}
+    .connection:after {content:'◆';position:absolute;right:-1px;top:calc(50% - 10px);font-size:13px;color:#8fa9d7}
+    .traffic-label {position:absolute;top:calc(50% - 48px);font-size:10px;font-weight:750;color:#4d6e9e;text-align:center;min-width:100px}
+    .packet {position:absolute;top:calc(50% - 22px);left:2%;font-size:12px;font-family:ui-monospace,monospace;color:#fff;background:var(--blue);border-radius:9px;padding:7px 8px;box-shadow:0 4px 13px #356ce54d;display:none;white-space:nowrap;z-index:5}
+    .connection.go .packet {display:block;animation:travelGo 1.6s ease-in-out both}
+    .connection.back .packet {display:block;background:var(--mint);animation:travelBack 1.6s ease-in-out both;box-shadow:0 4px 13px #16a17b44}
+    @keyframes travelGo {from {left:0;transform:translateX(-10%);opacity:.4}to {left:100%;transform:translateX(-88%);opacity:1}}
+    @keyframes travelBack {from {left:100%;transform:translateX(-88%);opacity:.4}to {left:0;transform:translateX(-10%);opacity:1}}
+    .wire-note {position:absolute;top:calc(50% + 19px);font-size:10px;color:#7285a4;text-align:center;white-space:nowrap}
+    .cabinet-outer {background:#f8fafc;border:2px solid #bbcce2;border-radius:15px;box-shadow:7px 8px 0 #dbe5f3;padding:11px 9px 12px;min-width:0}
+    .cabinet-title {font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:6px;font-weight:850;margin:0 3px 9px}
+    .cabinet-title small {font-size:10px;color:#7991ac;font-weight:650}
+    .shelf {border:1px solid #d4deec;border-radius:11px;background:#fff;margin-top:7px;padding:8px;transition:box-shadow .2s,border-color .2s,opacity .2s}
+    .shelf.dimmed {opacity:.52}
+    .shelf.focus {border-color:var(--blue);box-shadow:0 0 0 2px #356ce51d}
+    .shelf-head {display:flex;justify-content:space-between;align-items:center;gap:4px;margin-bottom:6px}
+    .shelf-head strong {font-size:10px;white-space:nowrap}.shelf-head span {font-size:10px;color:#697f9a}
+    .shelf[data-family="coil"] .shelf-head strong {color:#147a5c}
+    .shelf[data-family="discrete"] .shelf-head strong {color:#a56b19}
+    .shelf[data-family="input"] .shelf-head strong {color:#285eb5}
+    .shelf[data-family="holding"] .shelf-head strong {color:#7244ae}
+    .drawer {display:flex;align-items:center;justify-content:space-between;gap:7px;border-radius:7px;background:#f0f4fa;border:1px solid #e3eaf5;padding:5px 7px;margin-top:5px;min-width:0;transition:transform .25s,background .25s,box-shadow .25s}
+    .drawer strong {font-family:ui-monospace,monospace;font-size:11px;color:#36516d;font-weight:800;white-space:nowrap}
+    .drawer .desc {font-size:10px;color:#65758b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;text-align:right}
+    .drawer.selected {background:#e3edff;border-color:#4e82ef;box-shadow:0 0 0 2px #4a7bea27}
+    .drawer.open {transform:translateX(-12px);box-shadow:7px 6px 6px #233f7024;background:#dce9ff;z-index:2;position:relative}
+    .drawer .knob {display:inline-block;border-radius:50%;width:7px;height:7px;background:#96afcb;margin-left:1px;flex-shrink:0}
+    .server-footer {text-align:center;font-size:11px;color:#60728b;margin-top:11px}
+    .signal {display:inline-block;width:7px;height:7px;border-radius:50%;background:#20ba87;margin-right:5px;vertical-align:1px}
+    .workbench-foot {padding:9px 17px 15px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+    .workbench-foot strong {color:var(--ink)}
+    .lesson-body {padding:19px}
+    .progress-heading {display:flex;align-items:center;justify-content:space-between;gap:7px}
+    .step-marker {font-size:12px;font-weight:850;color:var(--blue)}
+    .step-counter {color:var(--muted);font-size:11px;font-weight:800}
+    .progress-track {height:6px;background:#eaf0f8;border-radius:15px;margin:12px 0 18px;overflow:hidden}
+    .progress-track div {height:100%;background:linear-gradient(90deg,#6f9afb,var(--blue));border-radius:15px;transition:width .27s}
+    #lessonTitle {font-size:23px;letter-spacing:-.04em;line-height:1.15;margin:0 0 9px}
+    #lessonText {font-size:14px;line-height:1.65;color:#4a607b;min-height:111px;margin:0 0 15px}
+    .explain-box {background:#f0f5ff;border-left:4px solid var(--blue);padding:12px 13px;border-radius:0 10px 10px 0;font-size:13px;min-height:84px}
+    .explain-box strong {display:block;font-size:12px;margin-bottom:5px;color:#23488c}
+    .controls {display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:21px}
+    .btn {border:1px solid #d3dfef;background:#fff;color:#304567;padding:11px 9px;border-radius:11px;font-size:12px;font-weight:850;display:flex;gap:7px;align-items:center;justify-content:center;transition:background .15s,transform .15s}
+    .btn:hover:not(:disabled) {background:#f1f5fb;transform:translateY(-1px)}
+    .btn:disabled {opacity:.48;cursor:not-allowed}
+    .btn.primary {background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover:not(:disabled) {background:#2258ca}
+    .btn.secondary {color:#3b5b90}
+    .controls .wide {grid-column:span 2}
+    .trace-panel {margin-top:15px}
+    .trace-inner {padding:17px 19px}
+    .trace-heading {display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .trace-heading strong {font-size:13px}
+    .hex-row {display:flex;gap:5px;align-items:stretch;margin:12px 0 3px;flex-wrap:wrap}
+    .hex-segment {border-radius:9px;padding:9px 11px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:14px;font-weight:800;letter-spacing:.04em;white-space:nowrap;border:1px solid transparent;transition:all .2s}
+    .hex-segment.function {background:var(--bluep);color:#2557af;border-color:#d7e3ff}
+    .hex-segment.address {background:var(--mintp);color:#167350;border-color:#cdeedd}
+    .hex-segment.quantity {background:var(--orangep);color:#a96710;border-color:#f5e2c4}
+    .hex-segment.data {background:var(--violetp);color:#6a40a3;border-color:#e4d8fa}
+    .hex-segment.selected {outline:3px solid #283e64;outline-offset:1px}
+    .hex-captions {display:flex;gap:8px;margin:3px 0 14px;font-size:11px;color:#697c96;flex-wrap:wrap}
+    .hex-captions span {display:inline-flex;align-items:center;gap:4px}
+    .dot {display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blue)}
+    .dot.address {background:#25ad7e}.dot.quantity {background:#de9a34}.dot.data {background:#875bd3}
+    .trace-note {font-size:11px;color:#687e98;line-height:1.55}
+    .trace-answer {border-top:1px solid var(--border);padding-top:12px;margin-top:12px}
+    .muted {color:var(--muted)}
+    .dim-trace {opacity:.4;filter:grayscale(.5)}
+    details {margin-top:11px;background:#f6f8fc;padding:10px 12px;border-radius:10px;font-size:12px;color:#50647e}
+    details summary {cursor:pointer;font-weight:850;color:#38557a}
+    details code {font-family:ui-monospace,monospace;font-weight:750;color:#263d62;overflow-wrap:anywhere}
+    .takeaway {display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;background:#e9f0ff;padding:15px;border-radius:14px;margin-top:17px}
+    .takeaway div {text-align:center}
+    .takeaway .tiny {font-size:11px;color:#5573a2}
+    .takeaway strong {display:block;font-size:16px;color:#234eab;font-family:ui-monospace,monospace}
+    .takeaway .chevron {font-size:25px;color:#7b97c4}
+    .quiz {margin-top:16px;background:white;border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+    .quiz-layout {display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:center}
+    .quiz h2 {font-size:19px;letter-spacing:-.02em;margin:0 0 8px}
+    .quiz p {margin:0;color:#576c87;font-size:13px}
+    .quiz-options {display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .quiz-options button {border:1px solid #cbd8ea;background:#f8fbff;color:#284363;border-radius:11px;padding:13px 7px;font-family:ui-monospace,monospace;font-weight:800;font-size:13px}
+    .quiz-options button:hover {background:#ebf2ff;border-color:var(--blue)}
+    .quiz-feedback {font-size:12px;color:#1b805c;font-weight:750;min-height:25px;margin-top:10px}
+    footer {text-align:center;font-size:11px;color:#7b8ba1;padding:17px 0 7px}
+    @media(max-width:1190px){.scenarios {grid-template-columns:repeat(3,1fr)}.lesson-layout{grid-template-columns:1fr}.workbench{grid-template-columns:minmax(180px,.67fr) minmax(110px,.45fr) minmax(245px,1fr)}#lessonText{min-height:0}.lesson-body{padding:20px}}
+    @media(max-width:680px){.shell{padding-left:13px;padding-right:13px}.brand{font-size:15px}.header-pill{display:none}.hero{padding-top:21px;align-items:start}.hero-tip{display:none}.scenarios{grid-template-columns:repeat(2,1fr)}.scenario{min-height:94px}.workbench{grid-template-columns:minmax(0,.83fr) minmax(32px,.15fr) minmax(0,1fr);gap:1px;padding:11px 8px;min-height:382px}.monitor{border-width:4px;border-bottom-width:8px;min-height:139px;padding:6px}.monitor-screen{font-size:9px;min-height:80px;padding:7px 4px}.monitor .term{font-size:9px}.device-heading{font-size:11px}.cabinet-outer{padding:7px 5px;border-width:1px;box-shadow:4px 4px 0 #dbe5f3}.cabinet-title{font-size:11px}.cabinet-title small{display:none}.shelf{padding:5px}.shelf-head strong{font-size:9px}.shelf-head span{font-size:9px}.drawer{padding:4px 3px;margin-top:3px;gap:2px}.drawer strong{font-size:9px}.drawer .desc{font-size:9px}.drawer .knob{display:none}.drawer.open{transform:translateX(-5px)}.connection .traffic-label{font-size:8px;min-width:0;word-break:break-word}.wire-note{display:none}.packet{font-size:8px;padding:5px 2px;letter-spacing:-1px}.cabinet-outer .server-footer{font-size:9px}.quiz-layout{grid-template-columns:1fr;gap:13px}.hero p{font-size:13px}.workbench-foot{font-size:11px}.takeaway{gap:4px;padding:10px}.takeaway strong{font-size:13px}.takeaway .tiny{font-size:10px}}
+    @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+<header><div class="shell">
+  <div class="brand"><span class="brand-icon" aria-hidden="true">▦</span><span>MODBUS <span style="color:#95baff">EN IMAGES</span></span></div>
+  <span class="header-pill">🔌 Animation pédagogique · Fonctionne hors ligne</span>
+</div></header>
+<main class="shell">
+  <section class="hero"><div><h1>Une armoire, des tiroirs… et une requête.</h1><p>Découvre Modbus pas à pas : un ordinateur demande une valeur, le serveur trouve le bon tiroir et répond. Aucune installation, aucun équipement requis.</p></div><span class="hero-tip">💡 Clique sur « Étape suivante »</span></section>
+  <div class="section-label">1 — Choisis une situation</div>
+  <nav class="scenarios" id="scenarioList" aria-label="Exemples Modbus"></nav>
+  <section class="lesson-layout" aria-label="Animation Modbus">
+    <div>
+      <section class="panel">
+        <div class="panel-head"><strong>🎬 Ce qui se passe sur le réseau</strong><span class="tag blue" id="opBadge">Lecture</span></div>
+        <div class="workbench">
+          <div class="pc-panel">
+            <div class="device-heading">💻 PC client</div>
+            <div class="monitor"><div class="term">TERMINAL · Modbus TCP</div><div class="monitor-screen" id="terminal" aria-live="polite"></div></div>
+            <div class="pc-caption">Pose la question ou envoie la commande</div>
+          </div>
+          <div class="connection" id="connection" aria-hidden="true"><div class="traffic-label" id="trafficLabel">Réseau TCP/IP</div><div class="line"></div><div class="packet" id="packet">04 00 00</div><div class="wire-note">↔ Ethernet ou Wi-Fi</div></div>
+          <div class="cabinet-outer"><div class="cabinet-title"><span>🏭 Serveur Modbus</span><small>Armoire virtuelle</small></div><div id="shelves"></div><div class="server-footer"><span class="signal"></span>Attend une requête</div></div>
+        </div>
+        <div class="workbench-foot"><span>📍 La <strong>famille</strong> choisit l’armoire ; l’<strong>adresse</strong> choisit le tiroir.</span><span id="statusText">Prêt à commencer</span></div>
+      </section>
+      <section class="panel trace-panel" aria-label="Décodage des trames">
+        <div class="panel-head"><strong>🔎 Décortiquons les octets</strong><span class="tag green">PDU simplifiée</span></div>
+        <div class="trace-inner">
+          <div class="trace-heading"><strong>Demande du PC → serveur</strong><span class="muted" style="font-size:11px" id="reqDescription"></span></div>
+          <div class="hex-row" id="requestBytes"></div>
+          <div class="hex-captions"><span><i class="dot"></i> Fonction</span><span><i class="dot address"></i> Adresse</span><span><i class="dot quantity"></i> Quantité</span><span><i class="dot data"></i> Valeur à écrire</span></div>
+          <div class="trace-answer" id="answerArea"><div class="trace-heading"><strong>Réponse du serveur → PC</strong><span class="muted" style="font-size:11px" id="resDescription"></span></div><div class="hex-row" id="responseBytes"></div><div class="trace-note" id="responseExplanation"></div></div>
+          <details><summary>Voir la trame Modbus TCP complète</summary><p>Les octets colorés ci-dessus forment la <strong>PDU</strong> Modbus. Sur le réseau TCP, on ajoute devant un en-tête <strong>MBAP de 7 octets</strong> (identifiant de transaction, protocole, longueur, unité).</p><p><strong>Requête complète :</strong><br><code id="fullRequest"></code></p><p><strong>Réponse complète :</strong><br><code id="fullResponse"></code></p><p>Exemple fictif : transaction 1, identifiant d'unité 1. Le port classique de Modbus TCP est <strong>502</strong>. Les séquences affichées sont en hexadécimal.</p></details>
+        </div>
+      </section>
+    </div>
+    <aside class="panel" aria-label="Explication étape par étape"><div class="lesson-body">
+      <div class="progress-heading"><span class="step-marker" id="stepMarker">ÉTAPE 1</span><span class="step-counter" id="stepCounter">1 / 7</span></div>
+      <div class="progress-track" aria-hidden="true"><div id="progressBar" style="width:14.29%"></div></div>
+      <h2 id="lessonTitle">Choisissons une mesure</h2>
+      <p id="lessonText"></p>
+      <div class="explain-box"><strong>💡 À retenir</strong><span id="lessonTakeaway"></span></div>
+      <div class="controls"><button class="btn secondary" id="prevBtn">← Précédent</button><button class="btn primary" id="nextBtn">Suivant →</button><button class="btn wide" id="autoBtn">▶ Lire l'animation automatiquement</button><button class="btn wide" id="resetBtn">↺ Recommencer cet exemple</button></div>
+      <div class="takeaway"><div><div class="tiny">Sur la notice</div><strong id="docAddress">30001</strong></div><span class="chevron">→</span><div><div class="tiny">Sur le réseau</div><strong id="wireAddress">04 + 0000</strong></div></div>
+      <p style="font-size:11px;color:#60728b;margin:12px 0 0">Les numéros 30001, 40001, etc. suivent une convention documentaire classique. Dans la trame, l'adresse est l'offset transmis (numéroté ici à partir de 0).</p>
+    </div></aside>
+  </section>
+  <section class="quiz" aria-label="Mini défi"><div class="quiz-layout"><div><div class="section-label" style="margin:0 0 7px">2 — Mini-défi</div><h2 id="quizTitle">À toi de trouver la bonne adresse !</h2><p id="quizQuestion">Le capteur d'humidité est dans le registre 30002. Quel offset doit-on envoyer dans la requête Modbus ?</p><div class="quiz-feedback" id="quizFeedback" role="status"></div></div><div><div class="quiz-options" id="quizOptions"></div><button id="nextQuiz" class="btn" style="margin-top:11px;width:100%">Autre question →</button></div></div></section>
+</main>
+<footer>MODBUS EN IMAGES • Simulateur pédagogique local • Les valeurs et l'armoire sont fictives, les codes fonctions et le format des PDU sont ceux du protocole Modbus.</footer>
+<script>
+'use strict';
+const groups = [
+  {id:'coil',name:'COILS',prefix:'0xxxx',descriptor:'Sorties 1 bit',rows:[['00001','Ventilateur'],['00002','Éclairage']]},
+  {id:'discrete',name:'DISCRETE INPUTS',prefix:'1xxxx',descriptor:'Entrées 1 bit',rows:[['10001','Contact porte'],['10002','Fin de course']]},
+  {id:'input',name:'INPUT REGISTERS',prefix:'3xxxx',descriptor:'Mesures 16 bits',rows:[['30001','Température'],['30002','Humidité'],['30003','Pression']]},
+  {id:'holding',name:'HOLDING REGISTERS',prefix:'4xxxx',descriptor:'Réglages 16 bits',rows:[['40001','Consigne'],['40002','Vitesse']]}
+];
+const scenarios = [
+ {id:'temp',emoji:'🌡️',short:'Température',sub:'Lire 30001',family:'input',doc:'30001',offset:0,fc:4,read:true,description:'L’ordinateur veut connaître la température.',unit:'°C'},
+ {id:'hum',emoji:'💧',short:'Humidité',sub:'Lire 30002',family:'input',doc:'30002',offset:1,fc:4,read:true,description:'L’ordinateur veut connaître l’humidité.',unit:'%'},
+ {id:'porte',emoji:'🚪',short:'Contact porte',sub:'Lire 10001',family:'discrete',doc:'10001',offset:0,fc:2,read:true,description:'L’ordinateur veut savoir si la porte est ouverte.',unit:''},
+ {id:'consigne',emoji:'🎚️',short:'Lire la consigne',sub:'Lire 40001',family:'holding',doc:'40001',offset:0,fc:3,read:true,description:'L’ordinateur veut connaître la consigne de température.',unit:'°C'},
+ {id:'ventilo',emoji:'🌀',short:'Ventilateur',sub:'Écrire 00001',family:'coil',doc:'00001',offset:0,fc:5,read:false,description:'L’ordinateur commande la marche ou l’arrêt du ventilateur.',unit:''},
+ {id:'regler',emoji:'🔧',short:'Régler à 25 °C',sub:'Écrire 40001',family:'holding',doc:'40001',offset:0,fc:6,read:false,description:'L’ordinateur demande une nouvelle consigne de 25 °C.',unit:'°C'}
+];
+const quizData = [
+ {q:'Le capteur d’humidité porte le numéro 30002. Quel offset faut-il envoyer ?',opts:['0002','0001','30002'],right:1,why:'30002 désigne le 2e Input Register. En commençant à 0 : adresse 0001.'},
+ {q:'Quel code fonction permet de lire la température du registre 30001 ?',opts:['03','04','05'],right:1,why:'04 permet de lire les Input Registers (famille 3xxxx).'},
+ {q:'Quel code fonction permet de lire le Holding Register 40001 ?',opts:['02','03','06'],right:1,why:'03 lit un Holding Register. 06 servirait à y écrire une valeur.'},
+ {q:'Pour allumer le ventilateur situé dans le coil 00001, quelle fonction utiliser ?',opts:['05','04','03'],right:0,why:'05 écrit un coil unique. La valeur FF 00 signifie ON.'},
+ {q:'Quel offset correspond au registre 30001 (premier Input Register) ?',opts:['0001','30001','0000'],right:2,why:'Le premier registre est à l’offset 0 (00 00) dans la trame.'}
+];
+let machine={fanOn:false,setpoint:220};
+let chosen='temp',step=0,autoTimer=null,transaction=null,quizIdx=0;
+const $=id=>document.getElementById(id);
+const hex=n=>Number(n).toString(16).padStart(2,'0').toUpperCase();
+const bytes16=n=>[hex((n>>>8)&0xff),hex(n&0xff)];
+const formatBytes=arr=>arr.join(' ');
+const groupName=family=>({coil:'Coils',discrete:'Discrete Inputs',input:'Input Registers',holding:'Holding Registers'})[family];
+const current=()=>scenarios.find(s=>s.id===chosen);
+function getRaw(s){return s.id==='temp'?235:s.id==='hum'?65:s.id==='porte'?1:s.id==='consigne'?machine.setpoint:s.id==='ventilo'?(transaction.target?1:0):250;}
+function formatted(s,raw){
+ if(s.id==='temp'||s.id==='consigne'||s.id==='regler')return (raw/10).toFixed(1).replace('.',',')+' °C';
+ if(s.id==='hum')return raw+' %';
+ if(s.id==='porte')return raw?'Porte ouverte':'Porte fermée';
+ if(s.id==='ventilo')return raw?'Ventilateur allumé':'Ventilateur éteint';
+ return String(raw);
+}
+function buildTransaction(s){
+ const target = s.id==='ventilo'?!machine.fanOn:(s.id==='regler'?250:null);
+ return {target,applied:false,value:s.read?getRaw(s):(s.id==='ventilo'?(target?1:0):250)};
+}
+function reqParts(s){
+ const addr=bytes16(s.offset);
+ if(s.fc===5)return [{type:'function',bytes:[hex(s.fc)]},{type:'address',bytes:addr},{type:'data',bytes:transaction.target?['FF','00']:['00','00']}];
+ if(s.fc===6)return [{type:'function',bytes:[hex(s.fc)]},{type:'address',bytes:addr},{type:'data',bytes:bytes16(transaction.value)}];
+ return [{type:'function',bytes:[hex(s.fc)]},{type:'address',bytes:addr},{type:'quantity',bytes:['00','01']}];
+}
+function resParts(s){
+ if(!s.read)return reqParts(s);
+ return [{type:'function',bytes:[hex(s.fc)]},{type:'quantity',bytes:s.fc===2?['01']:['02']},{type:'data',bytes:s.fc===2?[hex(transaction.value)]:bytes16(transaction.value)}];
+}
+function flatten(parts){return parts.flatMap(p=>p.bytes)}
+function tcpFrame(parts){const p=flatten(parts);return [...['00','01','00','00'],...bytes16(p.length+1),'01',...p]}
+function renderScenarios(){
+ $('scenarioList').innerHTML=scenarios.map(s=>`<button type="button" class="scenario ${s.id===chosen?'active':''}" data-scenario="${s.id}" aria-pressed="${s.id===chosen}"><span class="emoji" aria-hidden="true">${s.emoji}</span><strong>${s.short}</strong><small>${s.sub}</small></button>`).join('');
+ document.querySelectorAll('[data-scenario]').forEach(b=>b.addEventListener('click',()=>selectScenario(b.dataset.scenario)));
+}
+function drawerValue(doc){
+ const map={'00001':machine.fanOn?'1 · ON':'0 · OFF','00002':'0 · OFF','10001':'1 · ouverte','10002':'0','30001':'235','30002':'65','30003':'1013','40001':String(machine.setpoint),'40002':'50'};
+ return map[doc]||'';
+}
+function renderCabinet(){
+ const s=current();
+ $('shelves').innerHTML=groups.map(g=>{
+ const focus=step>=1 && s.family===g.id;
+ const dimmed=step>=1 && !focus;
+ const rows=g.rows.map(row=>{
+ const on=s.doc===row[0] && step>=2;
+ return `<div class="drawer ${on?'selected':''} ${on&&step>=4?'open':''}" aria-label="Registre ${row[0]}, ${row[1]}, valeur ${drawerValue(row[0])}"><strong>${row[0]}</strong><span class="desc">${row[1]}</span><i class="knob"></i></div>`;
+ }).join('');
+ return `<div class="shelf ${focus?'focus':''} ${dimmed?'dimmed':''}" data-family="${g.id}"><div class="shelf-head"><strong>${g.name}</strong><span>${g.prefix}</span></div>${rows}</div>`;
+ }).join('');
+}
+function description(s){return s.id==='ventilo'?(transaction.target?'Allumer':'Éteindre')+' le ventilateur':s.description;}
+function detailText(s){
+ const offset=s.offset,position=offset+1,raw=transaction.value;
+ const operation=s.read?'lire':'écrire';
+ const valueToWrite=s.fc===5?(transaction.target?'FF 00 (marche)':'00 00 (arrêt)'):(s.fc===6?'00 FA (250)':'');
+ const offDisplay=bytes16(offset).join(' ');
+ const phases=[
+  {title:'Que veut-on faire ?', text:`${description(s)} Le PC ne connaît pas directement la valeur. Il va parler à une armoire virtuelle grâce au protocole Modbus.`, tip:`Dans cette animation, chaque tiroir possède un numéro documentaire comme ${s.doc}. Les données et les équipements sont simulés.`},
+  {title:'Choisir la bonne armoire',text:`Il existe plusieurs familles de données. « ${groupName(s.family)} » est l’armoire qui nous intéresse. Le code fonction <b>${hex(s.fc)}</b> indique au serveur qu’on veut ${operation} dans cette famille.`,tip:`<b>Code ${hex(s.fc)}</b> : ${s.fc===2?'lire une entrée binaire':s.fc===3?'lire des Holding Registers':s.fc===4?'lire des Input Registers':s.fc===5?'écrire un coil':"écrire un Holding Register"}.`},
+  {title:'Trouver le bon tiroir',text:`La notice de l’équipement indique <b>${s.doc}</b>. C’est le <b>${position}${position===1?'er':'e'} tiroir</b> de l’armoire « ${groupName(s.family)} ». Dans notre exemple, Modbus commence à numéroter les positions à 0 : son adresse sur le réseau est donc <b>${offDisplay}</b>.`,tip:`${s.doc} (sur la notice) → adresse ${offset} (dans la trame). On n’envoie pas le nombre « ${s.doc} » tel quel.`},
+  {title:'Construire la requête',text:`Le PC prépare sa demande avec <b>${s.read?'3 champs':'3 champs'}</b> : fonction <b>${hex(s.fc)}</b>, adresse <b>${offDisplay}</b> et ${s.read?'quantité <b>00 01</b> (un seul élément)':'valeur à écrire <b>'+valueToWrite+'</b>'}. Tous ces nombres sont écrits en <b>hexadécimal</b>.`,tip:`${s.read?'Le champ 00 01 signifie « lire un élément », pas la valeur de cet élément.':'Le champ de droite contient une commande ou une nouvelle valeur, pas une quantité.'}`},
+  {title:'Le PC envoie sa demande',text:`La requête part sur le réseau TCP/IP. Le serveur lit le code <b>${hex(s.fc)}</b>, se dirige vers l’armoire « ${groupName(s.family)} », puis ouvre le tiroir à l’adresse <b>${offset}</b>. ${s.read?'Il consulte la valeur qui s’y trouve.':'Il applique la nouvelle valeur dans ce tiroir.'}`,tip:`Le serveur ne devine pas les informations : il suit le code fonction et l’adresse reçus.`},
+  {title:'Le serveur répond',text:s.read?`Le serveur renvoie la valeur brute <b>${raw}</b>. ${s.fc===2?'Pour un bit, la valeur est codée dans un octet de données.':'Pour un registre de 16 bits, la valeur est codée sur deux octets.'}`:`Le serveur confirme l’écriture de <b>${formatted(s,raw)}</b> en renvoyant les mêmes champs que ceux de la commande.`,tip:s.read?`La réponse contient <b>la valeur du tiroir</b>, pas son numéro documentaire.`:`Pour les fonctions 05 et 06, la réponse normale reprend l’adresse et la valeur écrites.`},
+  {title:'Le PC comprend le résultat',text:s.read?`Valeur reçue : <b>${raw}</b>. Résultat interprété : <b>${formatted(s,raw)}</b>. Le PC connaît maintenant la mesure ou l’état demandé.`:`La commande a été acceptée. Résultat : <b>${formatted(s,raw)}</b>. Tu peux recommencer pour observer un autre échange.`,tip:s.id==='temp'||s.id==='consigne'||s.id==='regler'?`Le protocole transporte un nombre entier : c’est la <b>documentation du fabricant</b> qui explique qu’ici on divise par 10.`:`Le protocole Modbus transporte des valeurs. Leur signification dépend de la documentation de l’équipement.`}
+ ];return phases[step];
+}
+function applyTransaction(){
+ if(transaction.applied)return;
+ const s=current();
+ if(s.id==='ventilo')machine.fanOn=transaction.target;
+ if(s.id==='regler')machine.setpoint=transaction.value;
+ transaction.applied=true;
+}
+function renderTrace(){
+ const s=current();
+ const rp=reqParts(s),sp=resParts(s);
+ $('reqDescription').textContent=s.read?'Lire 1 donnée':'Écrire 1 donnée';
+ $('resDescription').textContent=s.read?'Valeur renvoyée':'Commande confirmée';
+ const accent=step===1?'function':step===2?'address':step===3?(s.read?'quantity':'data'):null;
+ function makeHtml(parts,active){return parts.map(p=>`<span class="hex-segment ${p.type} ${active===p.type?'selected':''}" title="${p.type==='function'?'Code fonction':p.type==='address'?'Offset de départ':p.type==='quantity'?'Quantité ou nombre d’octets':'Valeur'}">${p.bytes.join(' ')}</span>`).join('')}
+ $('requestBytes').innerHTML=makeHtml(rp,accent);
+ $('responseBytes').innerHTML=makeHtml(sp,null);
+ $('answerArea').classList.toggle('dim-trace',step<5);
+ $('responseExplanation').innerHTML=s.read?`La valeur brute <b>${transaction.value}</b> revient au PC, soit <b>${formatted(s,transaction.value)}</b>.`:`Le serveur répète les champs de la requête pour confirmer l’écriture.`;
+ $('fullRequest').textContent=formatBytes(tcpFrame(rp));
+ $('fullResponse').textContent=formatBytes(tcpFrame(sp));
+}
+function renderTerminal(){
+ const s=current(),rp=reqParts(s),sp=resParts(s);
+ const request=formatBytes(flatten(rp));const response=formatBytes(flatten(sp));
+ const first=`<span class="term-row"><span class="prompt">&gt;</span> ${s.read?'READ':'WRITE'} ${s.doc}</span>`;
+ let second='<span class="term-row hex-blue">Prêt à envoyer...</span>';
+ let third='<span class="term-row" style="color:#8ca4c7">En attente...</span>';
+ if(step>=3)second=`<span class="term-row hex-blue">TX ${request}</span>`;
+ if(step>=5)third=`<span class="term-row hex-green">RX ${response}</span>`;
+ if(step===6)third+=`<span class="term-row prompt">✓ ${formatted(s,transaction.value)}</span>`;
+ $('terminal').innerHTML=first+second+third;
+}
+function render(){
+ const s=current(),d=detailText(s);
+ renderScenarios();renderCabinet();renderTerminal();renderTrace();
+ $('stepMarker').textContent='ÉTAPE '+(step+1);
+ $('stepCounter').textContent=(step+1)+' / 7';
+ $('progressBar').style.width=((step+1)/7*100)+'%';
+ $('lessonTitle').textContent=d.title;
+ $('lessonText').innerHTML=d.text;
+ $('lessonTakeaway').innerHTML=d.tip;
+ $('opBadge').textContent=s.read?'Lecture · Fonction '+hex(s.fc):'Écriture · Fonction '+hex(s.fc);
+ $('docAddress').textContent=s.doc;
+ $('wireAddress').textContent=hex(s.fc)+' + '+bytes16(s.offset).join('');
+ $('prevBtn').disabled=step===0;
+ $('nextBtn').textContent=step===6?'↺ Rejouer l’exemple':'Suivant →';
+ $('autoBtn').textContent=autoTimer!==null?'⏸ Mettre en pause':'▶ Lire l’animation automatiquement';
+ $('statusText').textContent=['Prêt à commencer','Armoire identifiée','Tiroir repéré','Trame préparée','Demande envoyée','Réponse reçue','Échange terminé'][step];
+ const conn=$('connection');conn.classList.remove('go','back');
+ $('trafficLabel').textContent=step===4?'PC → Serveur':step===5?'Serveur → PC':'Réseau TCP/IP';
+ $('packet').textContent=(step===5?hex(s.fc)+' • RÉP':hex(s.fc)+' • DEM');
+ if(step===4||step===5){void conn.offsetWidth;conn.classList.add(step===4?'go':'back')}
+}
+function selectScenario(id){stopAuto();chosen=id;step=0;transaction=buildTransaction(current());render()}
+function goTo(n){
+ if(n>6){resetExample();return}
+ const next=Math.max(0,Math.min(6,n));
+ if(next>=4)applyTransaction();
+ step=next;render();
+}
+function resetExample(){stopAuto();step=0;transaction=buildTransaction(current());render()}
+function stopAuto(){if(autoTimer!==null){clearInterval(autoTimer);autoTimer=null}}
+function toggleAuto(){
+ if(autoTimer!==null){stopAuto();render();return}
+ if(step===6){step=0;transaction=buildTransaction(current())}
+ goTo(step+1);
+ if(step<6)autoTimer=setInterval(()=>{
+   if(step>=6){stopAuto();render();return}
+   goTo(step+1);
+   if(step>=6){stopAuto();render()}
+ },2250);
+ render();
+}
+function renderQuiz(){
+ const q=quizData[quizIdx];
+ $('quizQuestion').textContent=q.q;
+ $('quizFeedback').textContent='';
+ $('quizOptions').innerHTML=q.opts.map((o,i)=>`<button type="button" data-quiz="${i}" aria-label="Réponse ${o}">${o}</button>`).join('');
+ document.querySelectorAll('[data-quiz]').forEach(b=>b.addEventListener('click',()=>{
+ const n=Number(b.dataset.quiz);
+ $('quizFeedback').textContent=(n===q.right?'✅ Exact ! ':'❌ Pas tout à fait. ')+q.why;
+ $('quizFeedback').style.color=n===q.right?'#197957':'#9c521f';
+ document.querySelectorAll('[data-quiz]').forEach(x=>{x.style.borderColor=Number(x.dataset.quiz)===q.right?'#30a374':'#cbd8ea';x.style.background=Number(x.dataset.quiz)===q.right?'#e6f8f0':'#f8fbff'});
+ }));
+}
+$('prevBtn').addEventListener('click',()=>{stopAuto();goTo(step-1)});
+$('nextBtn').addEventListener('click',()=>{stopAuto();goTo(step+1)});
+$('autoBtn').addEventListener('click',toggleAuto);
+$('resetBtn').addEventListener('click',resetExample);
+$('nextQuiz').addEventListener('click',()=>{quizIdx=(quizIdx+1)%quizData.length;renderQuiz()});
+transaction=buildTransaction(current());render();renderQuiz();
+</script>
+</body>
+</html>

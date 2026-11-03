@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Configuration Cisco — Switch &amp; Routeur — BTS CIEL</title>
+<style>
+/* ── Palette terminal ── */
+:root {
+  --bg:     #0d1117;
+  --bg2:    #161b22;
+  --bg3:    #21262d;
+  --border: #30363d;
+  --text:   #e6edf3;
+  --muted:  #8b949e;
+  --blue:   #79c0ff;
+  --green:  #56d364;
+  --yellow: #e3b341;
+  --red:    #ff7b72;
+  --purple: #d2a8ff;
+  --orange: #ffa657;
+  --cyan:   #39d353;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  padding: 1.6rem 2rem;
+  /* A1 proportions — adapté écran / impression */
+}
+.poster { max-width: 1400px; margin: 0 auto; }
+
+/* ── En-tête ── */
+.header {
+  display: flex; justify-content: space-between;
+  align-items: flex-end; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 1.4rem;
+  padding-bottom: .9rem;
+  border-bottom: 2px solid var(--border);
+}
+.title    { font-size: 28px; font-weight: 700; letter-spacing: -.5px; color: var(--blue); }
+.subtitle { font-size: 11.5px; color: var(--muted); margin-top: 4px; letter-spacing: .03em; }
+
+/* ── Section label ── */
+.sl {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+
+/* ── Grilles ── */
+.sec  { margin-bottom: 1.2rem; }
+.g2   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.g3   { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.g32  { display: grid; grid-template-columns: 3fr 2fr; gap: 12px; }
+.g23  { display: grid; grid-template-columns: 2fr 3fr; gap: 12px; }
+
+/* ── Cartes ── */
+.card  { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: .75rem .9rem; height: 100%; }
+.card2 { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: .75rem .9rem; height: 100%; }
+
+/* ── Séparateur ── */
+.sep { border: none; border-top: 1px solid var(--border); margin: 7px 0; }
+
+/* ── Badges ── */
+.badge { display: inline-flex; font-size: 10px; font-weight: 700;
+         padding: 2px 7px; border-radius: 3px; letter-spacing: .04em; }
+.bi { background: #1f3a56; color: var(--blue); }
+.bs { background: #1a3a2a; color: var(--green); }
+.bw { background: #3a2e1a; color: var(--yellow); }
+.bd { background: #3a1a1a; color: var(--red); }
+.bg { background: var(--bg3); color: var(--muted); }
+.bp { background: #2d1f4a; color: var(--purple); }
+.bo { background: #3a2910; color: var(--orange); }
+
+/* ── Couleurs texte ── */
+.ci  { color: var(--blue); }
+.cs  { color: var(--green); }
+.cw  { color: var(--yellow); }
+.cd  { color: var(--red); }
+.cm  { color: var(--muted); }
+.cp  { color: var(--text); font-weight: 700; }
+.pur { color: var(--purple); }
+.cor { color: var(--orange); }
+
+/* ── Code ── */
+pre {
+  font-family: 'Courier New', monospace;
+  font-size: 11px; line-height: 1.85;
+  margin: 0; white-space: pre;
+  overflow-x: auto;
+}
+
+/* ── Tableaux ── */
+table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+td, th { padding: 5px 4px; vertical-align: top; }
+tr + tr td { border-top: 1px solid var(--border); }
+th {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--muted); padding-bottom: 5px;
+  text-align: left; border-bottom: 1px solid var(--border);
+}
+
+/* ── Pied de page ── */
+.footer {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 9px; margin-top: 4px;
+  flex-wrap: wrap; gap: 6px;
+}
+
+/* ── Titre de section avec icône ── */
+.stitle {
+  font-size: 11px; font-weight: 700; color: var(--text);
+  margin-bottom: 7px; padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* ── Mini note ── */
+.note {
+  font-size: 10.5px; color: var(--muted);
+  margin-top: 5px; line-height: 1.6;
+}
+
+/* ── Pipeline step ── */
+.pipe-step {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px 8px;
+  margin-bottom: 4px;
+}
+</style>
+</head>
+<body>
+<div class="poster">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     EN-TÊTE
+═══════════════════════════════════════════════════════════════ -->
+<div class="header">
+  <div>
+    <div class="title">🖧 Configuration Cisco — Switch &amp; Routeur</div>
+    <div class="subtitle">IOS CLI · Mots de passe · Telnet · SSH · IP · VLAN · Trunk · Routage · Inter-VLAN · DHCP · Switch L3</div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end">
+    <span class="badge bi">IOS 15+</span>
+    <span class="badge bs">Switch L2 / L3</span>
+    <span class="badge bw">Routeur ISR</span>
+    <span class="badge bp">BTS CIEL IR</span>
+    <span class="badge bo">Cisco IOS</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ROW 1 : CONFIG DE BASE (3 colonnes)
+═══════════════════════════════════════════════════════════════ -->
+<div class="sec g3">
+
+  <!-- CONFIG INITIALE -->
+  <div>
+    <p class="sl">① Configuration initiale — Tous équipements</p>
+    <div class="card2">
+      <div class="stitle"><span class="badge bi">BASE</span> Accès &amp; Identité</div>
+<pre><span class="cm">! Entrée en mode privilégié</span>
+<span class="cs">enable</span>
+<span class="cm">! Mode configuration globale</span>
+<span class="cs">configure terminal</span>
+
+<span class="cm">! Nom de l'équipement</span>
+<span class="ci">hostname</span> <span class="cw">SW-CORE</span>
+
+<span class="cm">! Bannière de connexion</span>
+<span class="ci">banner motd</span> <span class="cor">#
+  Acces reserve aux personnes autorisees.
+  Lycee Newton-ENREA — BTS CIEL
+#</span>
+
+<span class="cm">! Désactiver la recherche DNS (évite délais)</span>
+<span class="cd">no ip domain-lookup</span>
+
+<span class="cm">! Sauvegarder la config</span>
+<span class="cs">copy running-config startup-config</span>
+<span class="cm">! ou abrégé :</span>
+<span class="cs">write memory</span>             <span class="cm">← wr</span></pre>
+    </div>
+  </div>
+
+  <!-- MOTS DE PASSE -->
+  <div>
+    <p class="sl">② Mots de passe — Sécurisation accès</p>
+    <div class="card2">
+      <div class="stitle"><span class="badge bd">SEC</span> Passwords</div>
+<pre><span class="cm">! Mot de passe enable (mode priv.)</span>
+<span class="ci">enable secret</span> <span class="cor">Cisco1234!</span>    <span class="cm">← MD5</span>
+
+<span class="cm">! Mot de passe console (accès physique)</span>
+<span class="ci">line console</span> <span class="cs">0</span>
+  <span class="ci">password</span> <span class="cor">Console1!</span>
+  <span class="ci">login</span>
+  <span class="ci">exec-timeout</span> <span class="cs">5 0</span>        <span class="cm">← 5 min</span>
+
+<span class="cm">! Mot de passe aux (modem)</span>
+<span class="ci">line aux</span> <span class="cs">0</span>
+  <span class="ci">password</span> <span class="cor">Aux1234!</span>
+  <span class="ci">login</span>
+
+<span class="cm">! Chiffrement de TOUS les passwords</span>
+<span class="ci">service password-encryption</span>   <span class="cm">← type 7</span>
+
+<span class="cm">! Longueur min mot de passe</span>
+<span class="ci">security passwords min-length</span> <span class="cs">8</span></pre>
+      <hr class="sep">
+      <div class="note">
+        <span class="cw">⚠</span> Toujours préférer <span class="ci">enable secret</span> (MD5) à <span class="cd">enable password</span> (clair).
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERFACE DE GESTION SWITCH -->
+  <div>
+    <p class="sl">③ Interface de gestion Switch (SVI VLAN 1)</p>
+    <div class="card2">
+      <div class="stitle"><span class="badge bs">MGMT</span> IP de gestion</div>
+<pre><span class="cm">! SVI (Switch Virtual Interface) VLAN 1</span>
+<span class="ci">interface vlan</span> <span class="cs">1</span>
+  <span class="ci">ip address</span> <span class="cw">192.168.1.10</span> <span class="cs">255.255.255.0</span>
+  <span class="cd">no shutdown</span>
+
+<span class="cm">! Passerelle par défaut du switch</span>
+<span class="ci">ip default-gateway</span> <span class="cw">192.168.1.1</span>
+
+<span class="cm">! Vérification</span>
+<span class="cs">show interface vlan 1</span>
+<span class="cs">show ip interface brief</span></pre>
+      <hr class="sep">
+      <div class="note">
+        Sur un switch L2, la SVI sert <span class="cp">uniquement à la gestion</span> (SSH, Telnet).<br>
+        Sur switch L3 : une SVI par VLAN pour le routage.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ROW 2 : TELNET + SSH (2 colonnes)
+═══════════════════════════════════════════════════════════════ -->
+<div class="sec g2">
+
+  <!-- TELNET -->
+  <div>
+    <p class="sl">④ Accès distant — Telnet (non chiffré)</p>
+    <div class="card2">
+      <div class="stitle"><span class="badge bw">TELNET</span> Port 23 — Non sécurisé</div>
+<pre><span class="cm">! Configuration des lignes VTY (0 à 15)</span>
+<span class="ci">line vty</span> <span class="cs">0 4</span>                 <span class="cm">← 5 sessions simultanées</span>
+  <span class="ci">password</span> <span class="cor">Telnet1234!</span>
+  <span class="ci">login</span>                       <span class="cm">← auth par password</span>
+  <span class="ci">transport input</span> <span class="cw">telnet</span>      <span class="cm">← ou : all</span>
+  <span class="ci">exec-timeout</span> <span class="cs">10 0</span>
+
+<span class="cm">! Avec base de données locale (recommandé)</span>
+<span class="ci">username</span> <span class="cw">admin</span> <span class="ci">privilege</span> <span class="cs">15</span> <span class="ci">secret</span> <span class="cor">Admin123!</span>
+<span class="ci">line vty</span> <span class="cs">0 4</span>
+  <span class="ci">login local</span>                 <span class="cm">← auth base locale</span>
+  <span class="ci">transport input</span> <span class="cw">telnet</span>
+
+<span class="cm">! Test depuis un PC</span>
+<span class="cs">telnet 192.168.1.10</span></pre>
+      <hr class="sep">
+      <div class="note"><span class="cd">⚠ Telnet transmet tout en clair !</span> À n'utiliser qu'en labo isolé. En production → SSH.</div>
+    </div>
+  </div>
+
+  <!-- SSH -->
+  <div>
+    <p class="sl">⑤ Accès distant — SSH v2 (chiffré ✔)</p>
+    <div class="card2">
+      <div class="stitle"><span class="badge bs">SSH v2</span> Port 22 — Chiffré &amp; Authentifié</div>
+<pre><span class="cm">! 1. Nom de domaine obligatoire (clé RSA)</span>
+<span class="ci">ip domain-name</span> <span class="cw">newton.local</span>
+
+<span class="cm">! 2. Créer un compte local avec privilege 15</span>
+<span class="ci">username</span> <span class="cw">admin</span> <span class="ci">privilege</span> <span class="cs">15</span> <span class="ci">secret</span> <span class="cor">Admin123!</span>
+
+<span class="cm">! 3. Générer la paire de clés RSA (≥ 1024 bits)</span>
+<span class="ci">crypto key generate rsa</span>
+<span class="cm">  → How many bits in the modulus? </span><span class="cw">2048</span>
+
+<span class="cm">! 4. Forcer SSH version 2</span>
+<span class="ci">ip ssh version</span> <span class="cs">2</span>
+<span class="ci">ip ssh time-out</span> <span class="cs">60</span>
+<span class="ci">ip ssh authentication-retries</span> <span class="cs">3</span>
+
+<span class="cm">! 5. Lignes VTY — SSH uniquement</span>
+<span class="ci">line vty</span> <span class="cs">0 15</span>
+  <span class="ci">login local</span>
+  <span class="ci">transport input</span> <span class="cs">ssh</span>        <span class="cm">← bloquer Telnet</span>
+
+<span class="cm">! Vérification &amp; test</span>
+<span class="cs">show ip ssh</span>
+<span class="cs">show ssh</span>
+<span class="cm">! Depuis PC Linux/Mac :</span>
+<span class="cs">ssh -l admin 192.168.1.10</span></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ROW 3 : ADRESSAGE IP ROUTEUR + VLANs (2 colonnes)
+═══════════════════════════════════════════════════════════════ -->
+<div class="sec g2">
+
+  <!-- ADRESSAGE IP ROUTEUR -->
+  <div>
+    <p class="sl">⑥ Adressage IP — Interfaces routeur</p>
+    <div class="card2">
+      <div class="stitle"><span class="badge bi">ROUTEUR</span> Interfaces physiques &amp; Loopback</div>
+<pre><span class="cm">! Interface LAN (FastEthernet / GigabitEthernet)</span>
+<span class="ci">interface GigabitEthernet</span> <span class="cs">0/0</span>
+  <span class="ci">description</span> <span class="cw">Connexion LAN VLAN-10</span>
+  <span class="ci">ip address</span> <span class="cw">192.168.10.1</span> <span class="cs">255.255.255.0</span>
+  <span class="cd">no shutdown</span>
+
+<span class="cm">! Interface WAN (vers FAI / autre routeur)</span>
+<span class="ci">interface Serial</span> <span class="cs">0/0/0</span>
+  <span class="ci">description</span> <span class="cw">Lien WAN FAI</span>
+  <span class="ci">ip address</span> <span class="cw">10.0.0.1</span> <span class="cs">255.255.255.252</span>
+  <span class="ci">clock rate</span> <span class="cor">64000</span>          <span class="cm">← si DCE</span>
+  <span class="cd">no shutdown</span>
+
+<span class="cm">! Interface Loopback (stable, test)</span>
+<span class="ci">interface Loopback</span> <span class="cs">0</span>
+  <span class="ci">ip address</span> <span class="cw">1.1.1.1</span> <span class="cs">255.255.255.255</span>
+
+<span class="cm">! Vérifications essentielles</span>
+<span class="cs">show ip interface brief</span>      <span class="cm">← état up/down + IP</span>
+<span class="cs">show interfaces Gi0/0</span>        <span class="cm">← détail complet</span>
+<span class="cs">show ip route</span>                <span class="cm">← table de routage</span></pre>
+    </div>
+  </div>
+
+  <!-- VLANs L2 -->
+  <div>
+    <p class="sl">⑦ VLANs — Switch L2 (création &amp; ports access)</p>
+    <div class="card2">
+      <div class="stitle"><span class="badge bp">VLANs</span> Segmentation logique</div>
+<pre><span class="cm">! Création des VLANs</span>
+<span class="ci">vlan</span> <span class="cs">10</span>
+  <span class="ci">name</span> <span class="cw">VLAN-DIRECTION</span>
+<span class="ci">vlan</span> <span class="cs">20</span>
+  <span class="ci">name</span> <span class="cw">VLAN-PROF</span>
+<span class="ci">vlan</span> <span class="cs">30</span>
+  <span class="ci">name</span> <span class="cw">VLAN-ELEVES</span>
+<span class="ci">vlan</span> <span class="cs">99</span>
+  <span class="ci">name</span> <span class="cw">VLAN-MGMT</span>
+
+<span class="cm">! Port ACCESS (PC, serveur → 1 seul VLAN)</span>
+<span class="ci">interface FastEthernet</span> <span class="cs">0/1</span>
+  <span class="ci">switchport mode access</span>
+  <span class="ci">switchport access vlan</span> <span class="cs">10</span>
+  <span class="cd">spanning-tree portfast</span>    <span class="cm">← terminaux seulmt</span>
+
+<span class="cm">! Désactiver ports inutilisés</span>
+<span class="ci">interface range Fa</span><span class="cs">0/10</span> <span class="ci">-</span> <span class="cs">24</span>
+  <span class="ci">switchport mode access</span>
+  <span class="ci">switchport access vlan</span> <span class="cs">999</span>  <span class="cm">← VLAN poubelle</span>
+  <span class="cd">shutdown</span>
+
+<span class="cm">! Vérifications</span>
+<span class="cs">show vlan brief</span>              <span class="cm">← liste VLANs + ports</span>
+<span class="cs">show interfaces Fa0/1 switchport</span></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ROW 4 : TRUNK + ROUTAGE STATIQUE (2 colonnes)
+═══════════════════════════════════════════════════════════════ -->
+<div class="sec g2">
+
+  <!-- TRUNK -->
+  <div>
+    <p class="sl">⑧ Trunk 802.1Q — Liaison entre switches / routeur</p>
+    <div class="card2">
+      <div class="stitle"><span class="badge bo">TRUNK</span> 802.1Q — Transport multi-VLANs</div>
+<pre><span class="cm">! Port TRUNK (switch ↔ switch, switch ↔ routeur)</span>
+<span class="ci">interface GigabitEthernet</span> <span class="cs">0/1</span>
+  <span class="ci">description</span> <span class="cw">Trunk vers SW-DISTRIB</span>
+  <span class="ci">switchport trunk encapsulation</span> <span class="cw">dot1q</span>  <span class="cm">← si requis</span>
+  <span class="ci">switchport mode trunk</span>
+  <span class="ci">switchport trunk native vlan</span> <span class="cs">99</span>      <span class="cm">← VLAN natif ≠ 1</span>
+  <span class="ci">switchport trunk allowed vlan</span> <span class="cs">10,20,30,99</span>
+
+<span class="cm">! Ajouter / retirer un VLAN du trunk</span>
+<span class="ci">switchport trunk allowed vlan add</span> <span class="cs">40</span>
+<span class="ci">switchport trunk allowed vlan remove</span> <span class="cs">30</span>
+
+<span class="cm">! Négociation DTP (à désactiver en prod)</span>
+<span class="ci">switchport nonegotiate</span>              <span class="cm">← désactive DTP</span>
+
+<span class="cm">! Vérifications</span>
+<span class="cs">show interfaces trunk</span>               <span class="cm">← tous les trunks</span>
+<span class="cs">show interfaces Gi0/1 trunk</span></pre>
+      <hr class="sep">
+      <div class="note">
+        <span class="cw">VLAN natif :</span> trafic non taggué — doit être <span class="cp">identique</span> des deux côtés du trunk.
+      </div>
+    </div>
+  </div>
+
+  <!-- ROUTAGE STATIQUE -->
+  <div>
+    <p class="sl">⑨ Routage statique — Table de routage manuelle</p>
+    <div class="card2">
+      <div class="stitle"><span class="badge bi">STATIC</span> Routes statiques &amp; par défaut</div>
+<pre><span class="cm">! Route statique classique</span>
+<span class="cm">! ip route [réseau] [masque] [nexthop | interface]</span>
+<span class="ci">ip route</span> <span class="cw">192.168.20.0</span> <span class="cs">255.255.255.0</span> <span class="cw">10.0.0.2</span>
+<span class="ci">ip route</span> <span class="cw">192.168.30.0</span> <span class="cs">255.255.255.0</span> <span class="cw">Gi0/1</span>
+
+<span class="cm">! Route par défaut (0.0.0.0/0)</span>
+<span class="ci">ip route</span> <span class="cs">0.0.0.0 0.0.0.0</span> <span class="cw">10.0.0.254</span>   <span class="cm">← vers FAI</span>
+
+<span class="cm">! Route flottante (backup, AD > 1)</span>
+<span class="ci">ip route</span> <span class="cs">0.0.0.0 0.0.0.0</span> <span class="cw">10.0.1.254</span> <span class="cor">200</span>
+
+<span class="cm">! Supprimer une route</span>
+<span class="cd">no ip route</span> <span class="wm">192.168.20.0</span> <span class="cs">255.255.255.0</span> <span class="wm">10.0.0.2</span>
+
+<span class="cm">! Vérifications</span>
+<span class="cs">show ip route</span>               <span class="cm">← S = static, C = conn.</span>
+<span class="cs">show ip route static</span>
+<span class="cs">ping 192.168.20.1</span>
+<span class="cs">traceroute 192.168.30.1</span></pre>
+      <hr class="sep">
+      <table>
+        <thead><tr><th>Code</th><th>Type de route</th><th>AD</th></tr></thead>
+        <tbody>
+          <tr><td class="cs">C</td><td class="cm">Connected (directement connecté)</td><td class="cs">0</td></tr>
+          <tr><td class="ci">S</td><td class="cm">Static (statique)</td><td class="ci">1</td></tr>
+          <tr><td class="cor">O</td><td class="cm">OSPF</td><td class="cor">110</td></tr>
+          <tr><td class="cw">R</td><td class="cm">RIP</td><td class="cw">120</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ROW 5 : INTER-VLAN (2 colonnes : RoaS + DHCP)
+═══════════════════════════════════════════════════════════════ -->
+<div class="sec g2">
+
+  <!-- INTER-VLAN ROAS -->
+  <div>
+    <p class="sl">⑩ Inter-VLAN — Router-on-a-Stick (sous-interfaces)</p>
+    <div class="card2">
+      <div class="stitle"><span class="badge bw">RoaS</span> 1 lien physique + N sous-interfaces</div>
+<pre><span class="cm">!── CÔTÉ SWITCH ─────────────────────────────</span>
+<span class="cm">! Port vers le routeur = TRUNK</span>
+<span class="ci">interface Gi</span><span class="cs">0/24</span>          <span class="cm">← port uplink routeur</span>
+  <span class="ci">switchport trunk encapsulation</span> <span class="cw">dot1q</span>
+  <span class="ci">switchport mode trunk</span>
+  <span class="ci">switchport trunk native vlan</span> <span class="cs">99</span>
+
+<span class="cm">!── CÔTÉ ROUTEUR ────────────────────────────</span>
+<span class="cm">! Interface physique allumée SANS IP</span>
+<span class="ci">interface GigabitEthernet</span> <span class="cs">0/0</span>
+  <span class="cd">no shutdown</span>
+
+<span class="cm">! Sous-interface VLAN 10</span>
+<span class="ci">interface GigabitEthernet</span> <span class="cs">0/0.10</span>
+  <span class="ci">encapsulation dot1Q</span> <span class="cs">10</span>      <span class="cm">← tag VLAN</span>
+  <span class="ci">ip address</span> <span class="cw">192.168.10.1</span> <span class="cs">255.255.255.0</span>
+
+<span class="cm">! Sous-interface VLAN 20</span>
+<span class="ci">interface GigabitEthernet</span> <span class="cs">0/0.20</span>
+  <span class="ci">encapsulation dot1Q</span> <span class="cs">20</span>
+  <span class="ci">ip address</span> <span class="cw">192.168.20.1</span> <span class="cs">255.255.255.0</span>
+
+<span class="cm">! Sous-interface VLAN natif (sans tag)</span>
+<span class="ci">interface GigabitEthernet</span> <span class="cs">0/0.99</span>
+  <span class="ci">encapsulation dot1Q</span> <span class="cs">99</span> <span class="cw">native</span>
+  <span class="ci">ip address</span> <span class="cw">192.168.99.1</span> <span class="cs">255.255.255.0</span>
+
+<span class="cm">! Vérification</span>
+<span class="cs">show ip interface brief</span>
+<span class="cs">ping 192.168.20.10</span>    <span class="cm">← depuis un PC VLAN 10</span></pre>
+      <hr class="sep">
+      <div class="note">
+        Chaque PC configure sa <span class="cp">passerelle par défaut</span> = IP de la sous-interface de son VLAN.<br>
+        <span class="cw">Limite :</span> tout le trafic inter-VLAN passe par le <span class="cp">lien trunk physique</span> (goulet d'étranglement).
+      </div>
+    </div>
+  </div>
+
+  <!-- DHCP SERVER -->
+  <div>
+    <p class="sl">⑪ Serveur DHCP — Sur le routeur Cisco</p>
+    <div class="card2">
+      <div class="stitle"><span class="badge bs">DHCP</span> Attribution IP automatique</div>
+<pre><span class="cm">! Exclure les IP réservées (routeur, serveurs)</span>
+<span class="ci">ip dhcp excluded-address</span> <span class="cw">192.168.10.1</span> <span class="cw">192.168.10.10</span>
+<span class="ci">ip dhcp excluded-address</span> <span class="cw">192.168.20.1</span> <span class="cw">192.168.20.10</span>
+
+<span class="cm">! Pool VLAN 10</span>
+<span class="ci">ip dhcp pool</span> <span class="cw">POOL-VLAN10</span>
+  <span class="ci">network</span> <span class="cw">192.168.10.0</span> <span class="cs">255.255.255.0</span>
+  <span class="ci">default-router</span> <span class="cw">192.168.10.1</span>    <span class="cm">← passerelle</span>
+  <span class="ci">dns-server</span> <span class="cw">8.8.8.8</span> <span class="cw">1.1.1.1</span>
+  <span class="ci">lease</span> <span class="cs">7</span>                        <span class="cm">← bail 7 jours</span>
+  <span class="ci">domain-name</span> <span class="cw">newton.local</span>
+
+<span class="cm">! Pool VLAN 20</span>
+<span class="ci">ip dhcp pool</span> <span class="cw">POOL-VLAN20</span>
+  <span class="ci">network</span> <span class="cw">192.168.20.0</span> <span class="cs">255.255.255.0</span>
+  <span class="ci">default-router</span> <span class="cw">192.168.20.1</span>
+  <span class="ci">dns-server</span> <span class="cw">8.8.8.8</span>
+  <span class="ci">lease</span> <span class="cs">1</span>
+
+<span class="cm">! Si DHCP distant (relay agent)</span>
+<span class="ci">interface Gi</span><span class="cs">0/0.10</span>
+  <span class="ci">ip helper-address</span> <span class="cw">192.168.99.100</span>  <span class="cm">← IP serveur DHCP</span>
+
+<span class="cm">! Vérifications</span>
+<span class="cs">show ip dhcp pool</span>               <span class="cm">← config des pools</span>
+<span class="cs">show ip dhcp binding</span>            <span class="cm">← baux actifs</span>
+<span class="cs">show ip dhcp conflict</span>           <span class="cm">← conflits IP</span>
+<span class="cd">clear ip dhcp binding *</span>         <span class="cm">← vider les baux</span></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ROW 6 : SWITCH L3 (pleine largeur)
+═══════════════════════════════════════════════════════════════ -->
+<div class="sec">
+  <p class="sl">⑫ Switch L3 — Routage inter-VLAN natif (Catalyst 3560/3750/3850…)</p>
+  <div class="card2">
+    <div class="stitle"><span class="badge bp">SWITCH L3</span> SVIs + ip routing — Solution recommandée en production</div>
+    <div class="g3" style="gap:10px">
+
+      <!-- COLONNE 1 : Activation routage -->
+      <div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.1em">Activation du routage</div>
+<pre><span class="cm">! Activer le routage IP (obligatoire)</span>
+<span class="ci">ip routing</span>              <span class="cm">← commande clé !</span>
+
+<span class="cm">! SVI par VLAN (= passerelle des PCs)</span>
+<span class="ci">interface vlan</span> <span class="cs">10</span>
+  <span class="ci">description</span> <span class="cw">Gateway VLAN-DIRECTION</span>
+  <span class="ci">ip address</span> <span class="cw">192.168.10.1</span> <span class="cs">255.255.255.0</span>
+  <span class="cd">no shutdown</span>
+
+<span class="ci">interface vlan</span> <span class="cs">20</span>
+  <span class="ci">description</span> <span class="cw">Gateway VLAN-PROF</span>
+  <span class="ci">ip address</span> <span class="cw">192.168.20.1</span> <span class="cs">255.255.255.0</span>
+  <span class="cd">no shutdown</span>
+
+<span class="ci">interface vlan</span> <span class="cs">30</span>
+  <span class="ci">description</span> <span class="cw">Gateway VLAN-ELEVES</span>
+  <span class="ci">ip address</span> <span class="cw">192.168.30.1</span> <span class="cs">255.255.255.0</span>
+  <span class="cd">no shutdown</span></pre>
+      </div>
+
+      <!-- COLONNE 2 : Port routed + route défaut -->
+      <div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.1em">Port routé vers routeur WAN</div>
+<pre><span class="cm">! Transformer un port switch en port routé</span>
+<span class="ci">interface GigabitEthernet</span> <span class="cs">1/0/1</span>
+  <span class="ci">description</span> <span class="cw">Uplink vers R1 (port routé)</span>
+  <span class="cd">no switchport</span>             <span class="cm">← mode routé !</span>
+  <span class="ci">ip address</span> <span class="cw">10.0.0.2</span> <span class="cs">255.255.255.252</span>
+  <span class="cd">no shutdown</span>
+
+<span class="cm">! Route par défaut vers le routeur WAN</span>
+<span class="ci">ip route</span> <span class="cs">0.0.0.0 0.0.0.0</span> <span class="cw">10.0.0.1</span>
+
+<span class="cm">! OSPF sur le switch L3</span>
+<span class="ci">router ospf</span> <span class="cs">1</span>
+  <span class="ci">router-id</span> <span class="wm">3.3.3.3</span>
+  <span class="ci">network</span> <span class="wm">192.168.10.0</span> <span class="cs">0.0.0.255</span> <span class="ci">area</span> <span class="cs">0</span>
+  <span class="ci">network</span> <span class="wm">192.168.20.0</span> <span class="cs">0.0.0.255</span> <span class="ci">area</span> <span class="cs">0</span>
+  <span class="ci">passive-interface</span> <span class="wm">vlan 10</span>
+  <span class="ci">passive-interface</span> <span class="wm">vlan 20</span></pre>
+      </div>
+
+      <!-- COLONNE 3 : Comparaison + vérifs -->
+      <div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.1em">Comparaison RoaS vs Switch L3</div>
+        <table>
+          <thead><tr><th>Critère</th><th class="cw">RoaS</th><th class="cs">Switch L3</th></tr></thead>
+          <tbody>
+            <tr><td class="cm">Matériel</td><td class="cw" style="font-size:11px">Routeur + SW L2</td><td class="cs" style="font-size:11px">SW L3 seul</td></tr>
+            <tr><td class="cm">Perf.</td><td class="cw" style="font-size:11px">Limitée (lien)</td><td class="cs" style="font-size:11px">HW (ASIC)</td></tr>
+            <tr><td class="cm">Coût</td><td class="cs" style="font-size:11px">Faible</td><td class="cw" style="font-size:11px">Plus élevé</td></tr>
+            <tr><td class="cm">Scalabilité</td><td class="cw" style="font-size:11px">Limitée</td><td class="cs" style="font-size:11px">Haute</td></tr>
+            <tr><td class="cm">Labo BTS</td><td class="cs" style="font-size:11px">✔ Courant</td><td class="cs" style="font-size:11px">✔ Idéal</td></tr>
+          </tbody>
+        </table>
+        <hr class="sep">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:5px;text-transform:uppercase;letter-spacing:.1em">Vérifications Switch L3</div>
+<pre style="font-size:10.5px"><span class="cs">show ip route</span>           <span class="cm">← table routage</span>
+<span class="cs">show interfaces vlan 10</span> <span class="cm">← état SVI</span>
+<span class="cs">show ip ospf neighbor</span>   <span class="cm">← voisins OSPF</span>
+<span class="cs">show mac address-table</span>  <span class="cm">← table MAC</span>
+<span class="cs">show cdp neighbors</span>      <span class="cm">← voisins CDP</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ROW 7 : COMMANDES DE VÉRIFICATION (tableau pleine largeur)
+═══════════════════════════════════════════════════════════════ -->
+<div class="sec">
+  <p class="sl">⑬ Commandes de vérification &amp; dépannage essentielles</p>
+  <div class="card">
+    <div class="g3" style="gap:14px">
+      <div>
+        <div class="stitle"><span class="badge bi">SHOW</span> Interfaces &amp; IP</div>
+        <table>
+          <thead><tr><th>Commande</th><th>Résultat</th></tr></thead>
+          <tbody>
+            <tr><td class="ci" style="font-size:10.5px;white-space:nowrap">show ip int brief</td><td class="cm" style="font-size:10.5px">État + IP de toutes les interfaces</td></tr>
+            <tr><td class="ci" style="font-size:10.5px;white-space:nowrap">show interfaces</td><td class="cm" style="font-size:10.5px">Détail (erreurs, bande passante)</td></tr>
+            <tr><td class="ci" style="font-size:10.5px;white-space:nowrap">show ip route</td><td class="cm" style="font-size:10.5px">Table de routage complète</td></tr>
+            <tr><td class="ci" style="font-size:10.5px;white-space:nowrap">show arp</td><td class="cm" style="font-size:10.5px">Table ARP (IP ↔ MAC)</td></tr>
+            <tr><td class="ci" style="font-size:10.5px;white-space:nowrap">show version</td><td class="cm" style="font-size:10.5px">Version IOS, mémoire, licence</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="stitle"><span class="badge bp">SHOW</span> VLANs &amp; Trunk</div>
+        <table>
+          <thead><tr><th>Commande</th><th>Résultat</th></tr></thead>
+          <tbody>
+            <tr><td class="pur" style="font-size:10.5px;white-space:nowrap">show vlan brief</td><td class="cm" style="font-size:10.5px">Liste VLANs + ports assignés</td></tr>
+            <tr><td class="pur" style="font-size:10.5px;white-space:nowrap">show interfaces trunk</td><td class="cm" style="font-size:10.5px">Ports trunk actifs + VLANs</td></tr>
+            <tr><td class="pur" style="font-size:10.5px;white-space:nowrap">show int Fa0/1 switchport</td><td class="cm" style="font-size:10.5px">Mode access/trunk du port</td></tr>
+            <tr><td class="pur" style="font-size:10.5px;white-space:nowrap">show mac address-table</td><td class="cm" style="font-size:10.5px">Table MAC (VLAN + port)</td></tr>
+            <tr><td class="pur" style="font-size:10.5px;white-space:nowrap">show spanning-tree</td><td class="cm" style="font-size:10.5px">État STP, root bridge</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="stitle"><span class="badge bs">TEST</span> Connectivité &amp; Config</div>
+        <table>
+          <thead><tr><th>Commande</th><th>Résultat</th></tr></thead>
+          <tbody>
+            <tr><td class="cs" style="font-size:10.5px;white-space:nowrap">ping 192.168.x.x</td><td class="cm" style="font-size:10.5px">Test accessibilité IP</td></tr>
+            <tr><td class="cs" style="font-size:10.5px;white-space:nowrap">traceroute X.X.X.X</td><td class="cm" style="font-size:10.5px">Chemin IP hop par hop</td></tr>
+            <tr><td class="cs" style="font-size:10.5px;white-space:nowrap">show running-config</td><td class="cm" style="font-size:10.5px">Config en cours (RAM)</td></tr>
+            <tr><td class="cs" style="font-size:10.5px;white-space:nowrap">show startup-config</td><td class="cm" style="font-size:10.5px">Config sauvegardée (NVRAM)</td></tr>
+            <tr><td class="cs" style="font-size:10.5px;white-space:nowrap">show ip ssh</td><td class="cm" style="font-size:10.5px">Version SSH + sessions actives</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ROW 8 : MODES IOS + RACCOURCIS (bas de poster)
+═══════════════════════════════════════════════════════════════ -->
+<div class="sec g2">
+
+  <!-- MODES IOS -->
+  <div>
+    <p class="sl">⑭ Modes de l'IOS Cisco — Navigation</p>
+    <div class="card">
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div class="pipe-step">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:11px;color:var(--muted)">Router<span class="cd">&gt;</span></span>
+            <span class="badge bg">USER EXEC</span>
+          </div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:2px">Accès limité : ping, show version · <span class="ci">enable</span> pour monter</div>
+        </div>
+        <div style="text-align:center;font-size:11px;color:var(--muted)">↓ <span class="ci">enable</span> &nbsp;&nbsp; ↑ <span class="cd">disable</span></div>
+        <div class="pipe-step">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:11px;color:var(--yellow)">Router<span class="cd">#</span></span>
+            <span class="badge bw">PRIVILEGED EXEC</span>
+          </div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:2px">show, copy, ping, debug · <span class="ci">configure terminal</span> pour monter</div>
+        </div>
+        <div style="text-align:center;font-size:11px;color:var(--muted)">↓ <span class="ci">configure terminal</span> &nbsp;&nbsp; ↑ <span class="cd">end / Ctrl+Z</span></div>
+        <div class="pipe-step">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:11px;color:var(--green)">Router(config)<span class="cd">#</span></span>
+            <span class="badge bs">GLOBAL CONFIG</span>
+          </div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:2px">hostname, vlan, ip route, crypto key… · sous-modes : <span class="ci">interface</span>, <span class="ci">line</span>, <span class="ci">router</span></div>
+        </div>
+        <div style="text-align:center;font-size:11px;color:var(--muted)">↓ <span class="ci">interface Gi0/0</span></div>
+        <div class="pipe-step">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:11px;color:var(--purple)">Router(config-if)<span class="cd">#</span></span>
+            <span class="badge bp">INTERFACE MODE</span>
+          </div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:2px">ip address, no shutdown, encapsulation, switchport…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RACCOURCIS + ASTUCES -->
+  <div>
+    <p class="sl">⑮ Raccourcis IOS &amp; Astuces CLI</p>
+    <div class="card">
+      <div class="stitle"><span class="badge bg">CLI</span> Productivité</div>
+      <table>
+        <thead><tr><th>Raccourci / Aide</th><th>Effet</th></tr></thead>
+        <tbody>
+          <tr><td class="ci" style="font-size:11px">Tab</td><td class="cm" style="font-size:11px">Complétion automatique de commande</td></tr>
+          <tr><td class="ci" style="font-size:11px">?</td><td class="cm" style="font-size:11px">Aide contextuelle (liste les options)</td></tr>
+          <tr><td class="ci" style="font-size:11px">show run | section vlan</td><td class="cm" style="font-size:11px">Filtrer la running-config</td></tr>
+          <tr><td class="ci" style="font-size:11px">show run | include ip address</td><td class="cm" style="font-size:11px">Chercher une ligne précise</td></tr>
+          <tr><td class="ci" style="font-size:11px">do show ip route</td><td class="cm" style="font-size:11px">Lancer un show depuis config mode</td></tr>
+          <tr><td class="ci" style="font-size:11px">Ctrl + Z</td><td class="cm" style="font-size:11px">Retour immédiat en Privileged Exec</td></tr>
+          <tr><td class="ci" style="font-size:11px">Ctrl + C</td><td class="cm" style="font-size:11px">Interrompre ping / traceroute</td></tr>
+          <tr><td class="ci" style="font-size:11px">Ctrl + Shift + 6</td><td class="cm" style="font-size:11px">Stopper commande bloquante</td></tr>
+          <tr><td class="cd" style="font-size:11px">no ip domain-lookup</td><td class="cm" style="font-size:11px">Évite DNS sur les fautes de frappe</td></tr>
+          <tr><td class="cd" style="font-size:11px">terminal length 0</td><td class="cm" style="font-size:11px">Désactive le -- More -- (scroll)</td></tr>
+        </tbody>
+      </table>
+      <hr class="sep">
+      <div class="note">
+        <span class="cw">Abbréviations :</span>
+        <span class="ci">en</span> = enable &nbsp;·&nbsp;
+        <span class="ci">conf t</span> = configure terminal &nbsp;·&nbsp;
+        <span class="ci">int Gi0/0</span> = interface GigabitEthernet 0/0 &nbsp;·&nbsp;
+        <span class="cs">wr</span> = write memory &nbsp;·&nbsp;
+        <span class="ci">sh ip int br</span> = show ip interface brief
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PIED DE PAGE
+═══════════════════════════════════════════════════════════════ -->
+<div class="footer">
+  <span>🎓 BTS CIEL IR · Réseaux &amp; Cybersécurité · Lycée Polyvalent Newton-ENREA</span>
+  <span>Cisco IOS 15+ · IOS-XE · Packet Tracer 8.x · GNS3</span>
+  <span>newtonformationsnir.fr · Cisco Networking Academy</span>
+</div>
+
+</div><!-- /poster -->
+</body>
+</html>

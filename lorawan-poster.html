@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>LoRaWAN — Poster Pédagogique — BTS CIEL</title>
+<style>
+:root {
+  --bg:     #0d1117;
+  --bg2:    #161b22;
+  --bg3:    #21262d;
+  --border: #30363d;
+  --text:   #e6edf3;
+  --muted:  #8b949e;
+  --blue:   #79c0ff;
+  --green:  #56d364;
+  --yellow: #e3b341;
+  --red:    #ff7b72;
+  --purple: #d2a8ff;
+  --orange: #ffa657;
+  --cyan:   #39d353;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  padding: 28px 32px;
+}
+/* ─── Layout A1 ─── */
+.poster { max-width: 1560px; margin: 0 auto; }
+
+/* ─── Header ─── */
+.header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  flex-wrap: wrap; gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--border);
+}
+.title-block .title { font-size: 34px; font-weight: 700; letter-spacing: -.5px; color: var(--blue); }
+.title-block .subtitle { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.header-badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+/* ─── Section label ─── */
+.sl {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 7px;
+}
+
+/* ─── Grilles ─── */
+.sec { margin-bottom: 16px; }
+.g2  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.g3  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.g4  { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.g5  { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+
+/* ─── Layout principal : 3 colonnes ─── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+.col-wide { grid-column: span 2; }
+
+/* ─── Cartes ─── */
+.card  { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.card2 { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+
+/* ─── Séparateur ─── */
+.sep { border: none; border-top: 1px solid var(--border); margin: 7px 0; }
+
+/* ─── Badges ─── */
+.badge { display: inline-flex; font-size: 10px; font-weight: 700;
+         padding: 2px 8px; border-radius: 3px; letter-spacing: .04em; white-space: nowrap; }
+.bi { background: #1f3a56; color: var(--blue); }
+.bs { background: #1a3a2a; color: var(--green); }
+.bw { background: #3a2e1a; color: var(--yellow); }
+.bd { background: #3a1a1a; color: var(--red); }
+.bg { background: var(--bg3); color: var(--muted); }
+.bp { background: #2d1f4a; color: var(--purple); }
+.bo { background: #3a2a14; color: var(--orange); }
+
+/* ─── Couleurs ─── */
+.ci  { color: var(--blue); }
+.cs  { color: var(--green); }
+.cw  { color: var(--yellow); }
+.cd  { color: var(--red); }
+.cm  { color: var(--muted); }
+.cp  { color: var(--text); font-weight: 700; }
+.pur { color: var(--purple); }
+.co  { color: var(--orange); }
+
+/* ─── Code ─── */
+pre {
+  font-family: 'Courier New', monospace;
+  font-size: 11px; line-height: 1.85;
+  margin: 0; white-space: pre-wrap;
+}
+
+/* ─── Tableaux ─── */
+table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+td, th { padding: 5px 4px; vertical-align: top; }
+tr + tr td { border-top: 1px solid var(--border); }
+th {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--muted); padding-bottom: 5px;
+  text-align: left;
+}
+
+/* ─── Pipeline / flèche ─── */
+.pipe-item {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 7px 10px; margin-bottom: 4px;
+}
+.arrow { text-align: center; font-size: 14px; color: var(--muted); margin: 2px 0; }
+
+/* ─── SF Gauge ─── */
+.sf-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.sf-label { font-size: 11px; font-weight: 700; width: 28px; flex-shrink: 0; }
+.sf-bar { height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+/* ─── Trame ─── */
+.frame-fields { display: flex; gap: 3px; flex-wrap: wrap; }
+.ff {
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 4px 7px; font-size: 10px; text-align: center;
+}
+.ff .ff-size { font-size: 9px; color: var(--muted); display: block; margin-top: 1px; }
+
+/* ─── Footer ─── */
+.footer {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 10px; margin-top: 4px;
+  flex-wrap: wrap; gap: 6px;
+}
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <!-- ════════ EN-TÊTE ════════ -->
+  <div class="header">
+    <div class="title-block">
+      <div class="title">LoRa™ &amp; LoRaWAN®</div>
+      <div class="subtitle">Modulation · Architecture · Sécurité · Activation · De l'objet à l'application</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge bi">LPWAN</span>
+      <span class="badge bs">868 MHz EU</span>
+      <span class="badge bw">Duty Cycle 1 %</span>
+      <span class="badge bp">AES-128</span>
+      <span class="badge bo">CSS / Chirp</span>
+      <span class="badge bg">LoRa Alliance</span>
+    </div>
+  </div>
+
+  <!-- ════════ LIGNE 1 : Contexte + Architecture + Fréquences ════════ -->
+  <div class="main-grid" style="margin-bottom:14px">
+
+    <!-- COL 1 — Contexte LPWAN -->
+    <div>
+      <p class="sl">Pourquoi LoRaWAN ? — Le dilemme IoT</p>
+      <div class="card">
+        <table>
+          <thead><tr>
+            <th>Technologie</th><th>Portée</th><th>Conso.</th><th>Débit</th><th>Coût</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="cm">Wi-Fi / BT</span></td>
+              <td class="cd">Courte</td>
+              <td class="cs">Faible</td>
+              <td class="cs">Élevé</td>
+              <td class="cs">Faible</td>
+            </tr>
+            <tr>
+              <td><span class="cm">4G / 5G</span></td>
+              <td class="cs">Longue</td>
+              <td class="cd">Élevée</td>
+              <td class="cs">Élevé</td>
+              <td class="cd">Élevé</td>
+            </tr>
+            <tr>
+              <td><span class="ci">LoRaWAN ✓</span></td>
+              <td class="cs">Longue</td>
+              <td class="cs">Très faible</td>
+              <td class="cw">~10 kbps</td>
+              <td class="cs">Efficace</td>
+            </tr>
+          </tbody>
+        </table>
+        <hr class="sep">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <div style="font-size:11px"><span class="cs">●</span> <span class="cp">Portée</span> jusqu'à <span class="ci">15 km</span> en rural</div>
+          <div style="font-size:11px"><span class="cs">●</span> <span class="cp">Autonomie</span> <span class="ci">années</span> sur batterie</div>
+          <div style="font-size:11px"><span class="cs">●</span> <span class="cp">Capacité</span> milliers d'objets/gateway</div>
+          <div style="font-size:11px"><span class="cs">●</span> <span class="cp">Bandes ISM</span> libres (sans licence)</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <p class="sl">Bandes de fréquences — Europe</p>
+        <div class="card2">
+          <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:8px">
+            <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px;text-align:center">
+              <div style="font-size:13px;font-weight:700;color:var(--muted)">433 MHz</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">LoRa P2P</div>
+              <span class="badge bg" style="margin-top:4px">point à point</span>
+            </div>
+            <div style="flex:1;background:var(--bg);border:2px solid var(--blue);border-radius:6px;padding:7px;text-align:center">
+              <div style="font-size:13px;font-weight:700" class="ci">868 MHz</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">LoRa + <span class="cs">LoRaWAN</span></div>
+              <span class="badge bi" style="margin-top:4px">réseau complet</span>
+            </div>
+            <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px;text-align:center">
+              <div style="font-size:13px;font-weight:700;color:var(--muted)">2.4 GHz</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">LoRa mondial</div>
+              <span class="badge bg" style="margin-top:4px">global</span>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);text-align:center">
+            ⚠ Seul <span class="ci">868 MHz</span> est utilisé pour LoRaWAN en Europe<br>
+            <span class="cw">Duty Cycle 1 %</span> — obligation réglementaire européenne (ETSI)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2 — Architecture de l'objet au cloud -->
+    <div>
+      <p class="sl">Architecture LoRaWAN — De l'objet au Cloud</p>
+      <div class="card">
+        <!-- End Device -->
+        <div class="pipe-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <span class="badge bi">① End Device</span>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px">Capteur/actionneur IoT — radio <span class="ci">LoRa</span></div>
+            </div>
+            <div style="text-align:right;font-size:10px;color:var(--muted)">DevEUI · AppSKey · NwkSKey</div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">
+            Émet en broadcast — <span class="cw">n'adresse pas une gateway spécifique</span>
+          </div>
+        </div>
+        <div class="arrow">↓ <span style="font-size:10px;color:var(--muted)">Modulation LoRa (CSS) · 868 MHz · Chirps</span></div>
+
+        <!-- Gateway -->
+        <div class="pipe-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <span class="badge bw">② Gateway</span>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px">Pont LoRa ↔ IP — écoute tous canaux &amp; SF</div>
+            </div>
+            <div style="text-align:right;font-size:10px;color:var(--muted)">EUI 64 bits<br>UDP/IP</div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">
+            Reçoit et transfère <span class="ci">sans déchiffrer</span> · Plusieurs gateways → redondance
+          </div>
+        </div>
+        <div class="arrow">↓ <span style="font-size:10px;color:var(--muted)">Internet / UDP · Semtech Packet Forwarder</span></div>
+
+        <!-- Network Server -->
+        <div class="pipe-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <span class="badge bp">③ Network Server</span>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px">Dédoublonnage · Authentification (NwkSKey)</div>
+            </div>
+            <div style="text-align:right;font-size:10px" class="cm">ChirpStack<br>TTN</div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">
+            Vérifie le <span class="ci">MIC</span> · Supprime les doublons · ADR
+          </div>
+        </div>
+        <div class="arrow">↓ <span style="font-size:10px;color:var(--muted)">Internet</span></div>
+
+        <!-- Application Server -->
+        <div class="pipe-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <span class="badge bs">④ Application Server</span>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px">Déchiffrement payload (AppSKey) → données lisibles</div>
+            </div>
+            <div style="text-align:right;font-size:10px" class="cm">MQTT<br>HTTP</div>
+          </div>
+        </div>
+        <div class="arrow">↓</div>
+
+        <!-- Web App -->
+        <div class="pipe-item">
+          <span class="badge bg">⑤ App Web / Utilisateur</span>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">
+            Dashboard · BDD · Alertes — <span class="cs">Flux uplink</span> (montant) / <span class="cw">downlink</span> (descendant)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3 — Modulation CSS -->
+    <div>
+      <p class="sl">Modulation LoRa — Chirp Spread Spectrum (CSS)</p>
+      <div class="card2">
+        <pre><span class="ci">Fréquence</span>  ▲
+868.0625 ─│    ╱│    ╱│
+          │   ╱ │   ╱ │   <span class="cm">← up-chirp</span>
+868.0000 ─│  ╱  │  ╱  │   <span class="cm">  fréquence centrale (canal)</span>
+          │ ╱   │ ╱   │
+867.9375 ─│╱    │╱    │
+          └──────────────▶ Temps
+          <span class="cm">Bande passante = 125 kHz (standard)</span></pre>
+        <hr class="sep">
+        <div style="font-size:11px;color:var(--muted)">
+          Un <span class="cp">chirp</span> = signal dont la fréquence monte linéairement<br>
+          sur toute la bande passante pendant la durée d'un symbole.<br>
+          <span class="ci">SF bits</span> encodés dans la <span class="cw">fréquence de départ</span> du chirp.
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <p class="sl">SF2 — 2 bits/symbole → 4 symboles possibles (2² = 4)</p>
+        <div class="card2">
+          <div style="display:flex;gap:4px;align-items:stretch">
+            <div style="display:flex;flex-direction:column;justify-content:space-between;font-size:9px;color:var(--muted);padding-right:4px;padding-bottom:20px;padding-top:4px;text-align:right;white-space:nowrap">
+              <span class="cw">F haute</span>
+              <span class="cm">F basse</span>
+            </div>
+            <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+              <div style="text-align:center">
+                <svg viewBox="0 0 60 55" style="width:100%;height:65px;display:block">
+                  <line x1="0" y1="50" x2="60" y2="50" stroke="#30363d" stroke-width="0.5"/>
+                  <line x1="0" y1="4" x2="60" y2="4" stroke="#30363d" stroke-width="0.5" stroke-dasharray="3,2"/>
+                  <polyline points="2,46 58,8" stroke="#79c0ff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                  <circle cx="2" cy="46" r="3" fill="#79c0ff"/>
+                </svg>
+                <div style="font-size:12px;font-weight:700;color:#79c0ff">"00"</div>
+                <div style="font-size:9px;color:var(--muted)">départ F<sub>min</sub></div>
+              </div>
+              <div style="text-align:center">
+                <svg viewBox="0 0 60 55" style="width:100%;height:65px;display:block">
+                  <line x1="0" y1="50" x2="60" y2="50" stroke="#30363d" stroke-width="0.5"/>
+                  <line x1="0" y1="4" x2="60" y2="4" stroke="#30363d" stroke-width="0.5" stroke-dasharray="3,2"/>
+                  <polyline points="2,34 34,8" stroke="#56d364" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                  <polyline points="34,46 58,34" stroke="#56d364" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="3,2" opacity="0.6"/>
+                  <circle cx="2" cy="34" r="3" fill="#56d364"/>
+                </svg>
+                <div style="font-size:12px;font-weight:700;color:#56d364">"01"</div>
+                <div style="font-size:9px;color:var(--muted)">départ +¼ BW</div>
+              </div>
+              <div style="text-align:center">
+                <svg viewBox="0 0 60 55" style="width:100%;height:65px;display:block">
+                  <line x1="0" y1="50" x2="60" y2="50" stroke="#30363d" stroke-width="0.5"/>
+                  <line x1="0" y1="4" x2="60" y2="4" stroke="#30363d" stroke-width="0.5" stroke-dasharray="3,2"/>
+                  <polyline points="2,21 18,8" stroke="#e3b341" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                  <polyline points="18,46 58,21" stroke="#e3b341" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="3,2" opacity="0.6"/>
+                  <circle cx="2" cy="21" r="3" fill="#e3b341"/>
+                </svg>
+                <div style="font-size:12px;font-weight:700;color:#e3b341">"10"</div>
+                <div style="font-size:9px;color:var(--muted)">départ +½ BW</div>
+              </div>
+              <div style="text-align:center">
+                <svg viewBox="0 0 60 55" style="width:100%;height:65px;display:block">
+                  <line x1="0" y1="50" x2="60" y2="50" stroke="#30363d" stroke-width="0.5"/>
+                  <line x1="0" y1="4" x2="60" y2="4" stroke="#30363d" stroke-width="0.5" stroke-dasharray="3,2"/>
+                  <polyline points="2,8 8,4" stroke="#ff7b72" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                  <polyline points="8,46 58,8" stroke="#ff7b72" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="3,2" opacity="0.6"/>
+                  <circle cx="2" cy="8" r="3" fill="#ff7b72"/>
+                </svg>
+                <div style="font-size:12px;font-weight:700;color:#ff7b72">"11"</div>
+                <div style="font-size:9px;color:var(--muted)">départ F<sub>max</sub></div>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:9px;color:var(--muted);margin-top:3px">◀── durée symbole Ts (identique pour tous) ──▶</div>
+          <hr class="sep">
+          <div style="font-size:10px;color:var(--muted);line-height:1.6">
+            <span class="cp">Principe</span> : même durée Ts, même BW — seule la <span class="ci">fréquence de départ</span> change pour encoder les bits. Le récepteur mesure ce point de départ pour décoder.<br>
+            <span class="cm">─ ─</span> = wrap cyclique : quand le chirp atteint F<sub>max</sub>, il reprend de F<sub>min</sub>.
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <p class="sl">Formules fondamentales</p>
+        <div class="card">
+          <table>
+            <thead><tr><th>Grandeur</th><th>Formule</th><th>Unité</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="cp">Durée symbole Ts</td>
+                <td class="ci">2<sup>SF</sup> / BW</td>
+                <td class="cm">secondes</td>
+              </tr>
+              <tr>
+                <td class="cp">Débit symbolique Fs</td>
+                <td class="ci">BW / 2<sup>SF</sup></td>
+                <td class="cm">symboles/s</td>
+              </tr>
+              <tr>
+                <td class="cp">Débit binaire Db</td>
+                <td class="ci">(BW / 2<sup>SF</sup>) × SF</td>
+                <td class="cm">bits/s</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ LIGNE 2 : SF + CR + Classes + Trame ════════ -->
+  <div class="main-grid" style="margin-bottom:14px">
+
+    <!-- COL 1 — Spreading Factor en détail -->
+    <div>
+      <p class="sl">Spreading Factor (SF) — Impact sur le réseau</p>
+      <div class="card">
+        <table>
+          <thead><tr>
+            <th>SF</th><th>Bits/symbole</th><th>Ts (125 kHz)</th><th>Portée</th><th>Débit</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="cs">SF7</td>
+              <td>7 bits → <span class="ci">128</span> symboles</td>
+              <td class="cs">1,02 ms</td>
+              <td class="cd">Courte</td>
+              <td class="cs">5,47 kbps</td>
+            </tr>
+            <tr>
+              <td class="cs">SF8</td>
+              <td>8 bits → <span class="ci">256</span> symboles</td>
+              <td>2,05 ms</td>
+              <td></td>
+              <td class="cs">3,13 kbps</td>
+            </tr>
+            <tr>
+              <td class="cw">SF9</td>
+              <td>9 bits → <span class="ci">512</span> symboles</td>
+              <td>4,1 ms</td>
+              <td></td>
+              <td class="cw">1,76 kbps</td>
+            </tr>
+            <tr>
+              <td class="cw">SF10</td>
+              <td>10 bits → <span class="ci">1024</span> symboles</td>
+              <td>8,19 ms</td>
+              <td></td>
+              <td class="cw">980 bps</td>
+            </tr>
+            <tr>
+              <td class="cd">SF11</td>
+              <td>11 bits → <span class="ci">2048</span> symboles</td>
+              <td>16,38 ms</td>
+              <td></td>
+              <td class="cd">537 bps</td>
+            </tr>
+            <tr>
+              <td class="cd">SF12</td>
+              <td>12 bits → <span class="ci">4096</span> symboles</td>
+              <td class="cd">32,77 ms</td>
+              <td class="cs">Longue</td>
+              <td class="cd">293 bps</td>
+            </tr>
+          </tbody>
+        </table>
+        <hr class="sep">
+        <div style="font-size:11px;color:var(--muted)">
+          ↑ SF → ↑ portée, ↑ sensibilité, ↓ débit, ↑ durée TX, ↓ autonomie batterie<br>
+          <span class="ci">Orthogonalité</span> : des SF différents sur le même canal ne se brouillent pas.<br>
+          <span class="cp">ADR</span> (Adaptive Data Rate) : le serveur ajuste automatiquement le SF.
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <p class="sl">Coding Rate (CR) — Correction d'erreur (FEC)</p>
+        <div class="card">
+          <table>
+            <thead><tr><th>CR</th><th>Bits utiles</th><th>Bits transmis</th><th>Overhead</th><th>Robustesse</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="cs">4/5</td><td>4</td><td>5</td>
+                <td class="cs">+25 %</td><td class="cm">minimale ← <span class="cs">défaut</span></td>
+              </tr>
+              <tr>
+                <td>4/6</td><td>4</td><td>6</td>
+                <td>+50 %</td><td class="cm">modérée</td>
+              </tr>
+              <tr>
+                <td>4/7</td><td>4</td><td>7</td>
+                <td>+75 %</td><td class="cw">bonne</td>
+              </tr>
+              <tr>
+                <td class="cd">4/8</td><td>4</td><td>8</td>
+                <td class="cd">+100 %</td><td class="cd">maximale — débit ÷2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2 — Classes d'objets + Duty Cycle -->
+    <div>
+      <p class="sl">Classes d'objets LoRaWAN</p>
+      <div class="g3" style="margin-bottom:10px">
+        <!-- Classe A -->
+        <div class="card">
+          <div style="text-align:center;margin-bottom:6px">
+            <span class="badge bi" style="font-size:13px;padding:4px 14px">A</span>
+            <div style="font-size:11px;font-weight:700;color:var(--blue);margin-top:4px">Le Plus Économe</div>
+          </div>
+          <hr class="sep">
+          <div style="font-size:10px;color:var(--muted);line-height:1.7">
+            Émission uplink <span class="cp">à la demande</span><br>
+            Ouvre <span class="ci">2 fenêtres RX</span> courtes après TX<br>
+            Reste en <span class="cs">veille</span> le reste du temps<br><br>
+            <span class="co">→</span> Capteurs batterie : T°, humidité
+          </div>
+          <hr class="sep">
+          <div style="font-size:10px;color:var(--muted)">
+            <span class="cm">TX</span> → RX1(1s) → RX2(2s) → <span class="cs">💤</span>
+          </div>
+        </div>
+        <!-- Classe B -->
+        <div class="card">
+          <div style="text-align:center;margin-bottom:6px">
+            <span class="badge bw" style="font-size:13px;padding:4px 14px">B</span>
+            <div style="font-size:11px;font-weight:700;color:var(--yellow);margin-top:4px">L'Équilibré</div>
+          </div>
+          <hr class="sep">
+          <div style="font-size:10px;color:var(--muted);line-height:1.7">
+            Classe A <span class="cp">+</span> ping slots programmés<br>
+            Se réveille sur <span class="ci">beacons</span> gateway<br>
+            Latence downlink <span class="cw">prévisible</span><br><br>
+            <span class="co">→</span> Contrôle régulier, irrigation
+          </div>
+          <hr class="sep">
+          <div style="font-size:10px;color:var(--muted)">
+            <span class="cm">TX</span> → RX1/2 → <span class="cw">beacon</span> → ping → veille
+          </div>
+        </div>
+        <!-- Classe C -->
+        <div class="card">
+          <div style="text-align:center;margin-bottom:6px">
+            <span class="badge bs" style="font-size:13px;padding:4px 14px">C</span>
+            <div style="font-size:11px;font-weight:700;color:var(--green);margin-top:4px">Le Plus Réactif</div>
+          </div>
+          <hr class="sep">
+          <div style="font-size:10px;color:var(--muted);line-height:1.7">
+            <span class="cs">RX continu</span> (sauf pendant TX)<br>
+            Latence downlink <span class="cs">quasi-nulle</span><br>
+            <span class="cd">Alimentation continue</span> requise<br><br>
+            <span class="co">→</span> Actionneurs : éclairage, pompe
+          </div>
+          <hr class="sep">
+          <div style="font-size:10px;color:var(--muted)">
+            <span class="cm">TX</span> → <span class="cs">RX permanent ←</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="sl">Structure des trames LoRaWAN (couches)</p>
+      <div class="card2">
+        <!-- Couche physique -->
+        <div style="margin-bottom:6px">
+          <div style="font-size:10px;font-weight:700;color:var(--orange);margin-bottom:4px">COUCHE PHYSIQUE (LoRa PHY)</div>
+          <div class="frame-fields">
+            <div class="ff" style="background:#2a1f14;border-color:var(--orange)">
+              <span class="co">Préambule</span>
+              <span class="ff-size">8+4.25 sym</span>
+            </div>
+            <div class="ff" style="background:var(--bg)">
+              <span class="cm">Header + CRC</span>
+              <span class="ff-size">20 bits</span>
+            </div>
+            <div class="ff" style="background:var(--bg3);flex:1">
+              <span class="ci">PHY Payload</span>
+              <span class="ff-size">P octets</span>
+            </div>
+            <div class="ff" style="background:var(--bg)">
+              <span class="cm">CRC</span>
+              <span class="ff-size">2 octets</span>
+            </div>
+          </div>
+        </div>
+        <!-- Couche MAC -->
+        <div style="margin-bottom:6px">
+          <div style="font-size:10px;font-weight:700;color:var(--purple);margin-bottom:4px">COUCHE LoRa MAC (PHY Payload)</div>
+          <div class="frame-fields">
+            <div class="ff" style="background:#2d1f4a;border-color:var(--purple)">
+              <span class="pur">MAC HDR</span>
+              <span class="ff-size">1 octet</span>
+            </div>
+            <div class="ff" style="background:var(--bg3);flex:1">
+              <span class="ci">MAC Payload</span>
+              <span class="ff-size">M octets</span>
+            </div>
+            <div class="ff" style="background:#1f3a56;border-color:var(--blue)">
+              <span class="ci">MIC</span>
+              <span class="ff-size">4 octets</span>
+            </div>
+          </div>
+        </div>
+        <!-- Couche Application -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);margin-bottom:4px">COUCHE APPLICATION (MAC Payload)</div>
+          <div class="frame-fields">
+            <div class="ff" style="background:#1a3a2a;border-color:var(--green)">
+              <span class="cs">DevAddr</span>
+              <span class="ff-size">4 octets</span>
+            </div>
+            <div class="ff" style="background:var(--bg)">
+              <span class="cm">FCtrl</span>
+              <span class="ff-size">1 octet</span>
+            </div>
+            <div class="ff" style="background:var(--bg)">
+              <span class="cm">FCnt</span>
+              <span class="ff-size">2 octets</span>
+            </div>
+            <div class="ff" style="background:var(--bg)">
+              <span class="cm">FOpts</span>
+              <span class="ff-size">0-15 oct</span>
+            </div>
+            <div class="ff" style="background:var(--bg)">
+              <span class="cm">FPort</span>
+              <span class="ff-size">1 octet</span>
+            </div>
+            <div class="ff" style="background:#1a3a2a;border-color:var(--green);flex:1">
+              <span class="cs">🔒 FPayload</span>
+              <span class="ff-size">N octets (chiffré AppSKey)</span>
+            </div>
+          </div>
+        </div>
+        <hr class="sep">
+        <div style="font-size:10px;color:var(--muted)">
+          <span class="cp">MACType</span> : <span class="ci">000</span> Join-Request · <span class="ci">001</span> Join-Accept · <span class="cs">010</span> Unconf.Up · <span class="cw">011</span> Unconf.Down · <span class="cs">100</span> Conf.Up · <span class="cw">101</span> Conf.Down
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3 — Sécurité -->
+    <div>
+      <p class="sl">Sécurité LoRaWAN — Deux clés AES-128</p>
+
+      <!-- NwkSKey -->
+      <div class="card" style="margin-bottom:10px;border-color:var(--blue)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span class="badge bi" style="font-size:11px">NwkSKey</span>
+          <div style="text-align:right;font-size:10px">
+            <span class="ci">Authenticité</span> + <span class="ci">Intégrité</span>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">
+          Partagée entre <span class="cp">Device LoRa</span> ↔ <span class="cp">Network Server</span> uniquement.
+        </div>
+        <div class="card2">
+          <pre><span class="cm">Device                    Network Server</span>
+<span class="ci">NwkSKey</span> ─→ aes128_cmac ─→ <span class="ci">MIC émis</span>
+<span class="cm">données chiffrées  │      MIC reçu  │</span>
+<span class="cm">───────────────────┘──────────────────</span>
+<span class="cs">Si MIC émis == MIC reçu → trame authentifiée</span></pre>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:5px">
+          La Gateway <span class="cd">ne connaît pas</span> NwkSKey · Protège contre la <span class="cw">falsification</span>
+        </div>
+      </div>
+
+      <!-- AppSKey -->
+      <div class="card" style="margin-bottom:10px;border-color:var(--green)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span class="badge bs" style="font-size:11px">AppSKey</span>
+          <div style="text-align:right;font-size:10px">
+            <span class="cs">Confidentialité</span>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">
+          Partagée entre <span class="cp">Device LoRa</span> ↔ <span class="cp">Application Server</span> uniquement.
+        </div>
+        <div class="card2">
+          <pre><span class="cm">Device                     App Server</span>
+<span class="cd">Données brutes</span>
+  └→ <span class="cs">AES-128 encrypt(AppSKey)</span>
+       └→ <span class="ci">Payload chiffré</span> ─────────→
+                              <span class="cs">AES-128 decrypt(AppSKey)</span>
+                                └→ <span class="cd">Données lisibles</span></pre>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:5px">
+          Ni Gateway, ni NS ne peuvent lire le payload → <span class="cs">chiffrement bout-en-bout</span>
+        </div>
+      </div>
+
+      <!-- Anti-replay -->
+      <div class="card" style="border-color:var(--yellow)">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+          <span class="badge bw">Anti-Replay</span>
+          <span style="font-size:11px;color:var(--muted)">Compteur de trame (FCnt)</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">
+          Chaque trame émise incrémente le <span class="ci">FCnt</span>. Le NS rejette toute trame avec<br>
+          un FCnt ≤ dernier FCnt reçu → protection contre l'attaque de <span class="cd">Replay</span>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ LIGNE 3 : Activation ABP vs OTAA ════════ -->
+  <div class="sec">
+    <p class="sl">Activation des Devices — ABP vs OTAA</p>
+    <div class="g2">
+      <!-- ABP -->
+      <div class="card" style="border-color:var(--yellow)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>
+            <span class="badge bw" style="font-size:12px">ABP — Activation By Personalization</span>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Méthode statique — configuration manuelle</div>
+          </div>
+          <span class="badge bw">⚠ Moins sécurisé</span>
+        </div>
+        <div class="g2" style="gap:8px">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px">DEVICE LoRa</div>
+            <div class="card2" style="font-size:11px;line-height:1.8">
+              <span class="ci">DevAddr</span> <span class="cm">← identifiant réseau</span><br>
+              <span class="cs">AppSKey</span> <span class="cm">← chiffrement (fixe)</span><br>
+              <span class="bi" style="color:var(--blue)">NwkSKey</span> <span class="cm">← auth (fixe)</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px">NETWORK + APP SERVER</div>
+            <div class="card2" style="font-size:11px;line-height:1.8">
+              <span class="ci">DevAddr</span><br>
+              <span class="cs">AppSKey</span><br>
+              <span class="bi" style="color:var(--blue)">NwkSKey</span>
+            </div>
+          </div>
+        </div>
+        <hr class="sep">
+        <div style="font-size:11px;color:var(--muted)">
+          <span class="cs">✓</span> Simple · Pas de procédure Join · Fonctionne immédiatement<br>
+          <span class="cd">✗</span> Clés fixes → si compromises, toutes les sessions sont compromises
+        </div>
+      </div>
+
+      <!-- OTAA -->
+      <div class="card" style="border-color:var(--green)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>
+            <span class="badge bs" style="font-size:12px">OTAA — Over The Air Activation</span>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Méthode dynamique — négociation des clés</div>
+          </div>
+          <span class="badge bs">✓ Recommandé</span>
+        </div>
+        <div class="g2" style="gap:8px">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px">DEVICE (identifiants permanents)</div>
+            <div class="card2" style="font-size:11px;line-height:1.8">
+              <span class="ci">DevEUI</span> <span class="cm">← ID matériel unique</span><br>
+              <span class="cw">AppEUI/JoinEUI</span> <span class="cm">← ID application</span><br>
+              <span class="cs">AppKey</span> <span class="cm">← clé racine secrète</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px">PROCÉDURE JOIN</div>
+            <div class="card2" style="font-size:11px">
+              <div style="display:flex;gap:5px;align-items:center;margin-bottom:3px">
+                <span class="badge bi">1</span>
+                <span class="cm"><span class="cp">Join Request</span> (DevEUI, AppEUI, DevNonce)</span>
+              </div>
+              <div style="text-align:center;font-size:10px;color:var(--muted)">→ NS vérifie + génère AppNonce</div>
+              <div style="display:flex;gap:5px;align-items:center;margin-top:3px">
+                <span class="badge bs">2</span>
+                <span class="cm"><span class="cp">Join Accept</span> chiffré (AppNonce, NetID, DevAddr)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card2" style="margin-top:8px">
+          <pre><span class="ci">NwkSKey</span> = aes128_encrypt(AppKey, <span class="co">0x01</span> | AppNonce | NetID | DevNonce | pad16)
+<span class="cs">AppSKey</span> = aes128_encrypt(AppKey, <span class="co">0x02</span> | AppNonce | NetID | DevNonce | pad16)</pre>
+        </div>
+        <hr class="sep">
+        <div style="font-size:11px;color:var(--muted)">
+          <span class="cs">✓</span> Clés de session <span class="cs">uniques et renouvelables</span> à chaque Join · Très sécurisé<br>
+          <span class="cw">!</span> Nécessite couverture réseau pour le Join initial
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ LIGNE 4 : Configuration pratique ════════ -->
+  <div class="sec">
+    <p class="sl">Mise en œuvre pratique — Configuration ChirpStack (OTAA)</p>
+    <div class="g4">
+      <!-- Étape 1 -->
+      <div class="card">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+          <span class="badge bi">Étape 1</span>
+          <span style="font-size:11px;font-weight:700">Gateway → Serveur</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">
+          Configurer l'IP/domaine du LoRaWAN Server dans l'interface web de la gateway.<br><br>
+          Enregistrer la gateway sur ChirpStack avec son <span class="ci">EUI 64 bits</span> (étiquette).
+        </div>
+      </div>
+      <!-- Étape 2 -->
+      <div class="card">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+          <span class="badge bw">Étape 2</span>
+          <span style="font-size:11px;font-weight:700">Créer Application</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">
+          Sur ChirpStack : créer une application (ex. "Capteurs Météo").<br><br>
+          Chaque application isole les devices et leurs données.
+        </div>
+      </div>
+      <!-- Étape 3 -->
+      <div class="card">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+          <span class="badge bp">Étape 3</span>
+          <span style="font-size:11px;font-weight:700">Enregistrer Device</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">
+          <span class="ci">DevEUI</span> → lire sur étiquette (Dragino) ou Serial Monitor (Arduino)<br>
+          <span class="cw">AppEUI</span> → souvent 0x0000…0001<br>
+          <span class="cs">AppKey</span> → générer aléatoirement sur ChirpStack
+        </div>
+      </div>
+      <!-- Étape 4 -->
+      <div class="card">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+          <span class="badge bs">Étape 4</span>
+          <span style="font-size:11px;font-weight:700">Flasher le Device</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">
+          Copier <span class="cs">AppKey</span> générée dans le code Arduino :<br>
+          <div class="card2" style="margin-top:5px;font-size:10px">
+            <pre><span class="pur">String</span> <span class="ci">appKey</span> = <span class="cs">"F4E3D2..."</span>;
+<span class="cm">// Téléverser → Join automatique</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ PIED DE PAGE ════════ -->
+  <div class="footer">
+    <span>BTS CIEL · Réseaux &amp; Cybersécurité · Lycée Newton-ENREA · Clichy</span>
+    <span>LoRaWAN Spec 1.0.x · LoRa Alliance · ChirpStack · The Things Network</span>
+    <span>LoRa™ / LoRaWAN® · Semtech · Fréquences EU868 · AES-128 · CSS Modulation</span>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>ACL Cisco — Cheatsheet BTS CIEL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050d16;--s1:#081422;--s2:#0b1a2e;--s3:#0e2040;
+  --b1:#152d4a;--b2:#1e3f68;--b3:#2a5a8c;
+  --cyan:#00d4ff;--cyan2:#0088aa;
+  --green:#2ecc40;--green2:#145a0a;
+  --orange:#ff6b35;--orange2:#8a2a00;
+  --yellow:#ffd166;--yellow2:#7a5500;
+  --purple:#c77dff;--purple2:#6a0dad;
+  --red:#ff4757;--blue:#4fc3f7;
+  --t1:#d0e8f8;--t2:#8ab4d8;--t3:#3a6080;--t4:#1e3a52;
+  --mono:'Share Tech Mono','Courier New',monospace;
+  --head:'Rajdhani',sans-serif;
+  --body:'Exo 2',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--t2);font-family:var(--body);font-size:11px;line-height:1.5}
+.page{padding:14px;display:grid;gap:8px}
+.pbt{position:fixed;top:10px;right:10px;background:var(--orange);color:#000;border:none;
+  padding:7px 18px;font-family:var(--head);font-size:14px;font-weight:700;
+  letter-spacing:1px;cursor:pointer;z-index:999;border-radius:2px}
+.pbt:hover{background:#fff}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#081422 0%,#0e2040 100%);
+  border:1px solid var(--b2);border-top:3px solid var(--orange);
+  padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
+.hdr h1{font-family:var(--head);font-size:30px;font-weight:700;
+  color:var(--orange);letter-spacing:2px;line-height:1}
+.hdr .sub{font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:3px}
+.badges{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.badge{font-family:var(--mono);font-size:9px;padding:3px 10px;border-radius:2px;border:1px solid;white-space:nowrap}
+.bo{border-color:var(--orange);color:var(--orange)}
+.bc{border-color:var(--cyan);color:var(--cyan)}
+.bg{border-color:var(--green);color:var(--green)}
+.by{border-color:var(--yellow);color:var(--yellow)}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--b1);padding:10px 12px}
+.ct{font-family:var(--head);font-size:12px;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--t1);padding-bottom:6px;margin-bottom:8px;
+  border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:7px}
+.ct .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+.g13{display:grid;grid-template-columns:1fr 3fr;gap:8px}
+.g23{display:grid;grid-template-columns:2fr 1.2fr;gap:8px}
+.g32{display:grid;grid-template-columns:1.2fr 2fr;gap:8px}
+
+/* CODE */
+.code{background:#020a12;border:1px solid var(--b1);border-left:2px solid var(--orange);
+  padding:7px 10px;font-family:var(--mono);font-size:9.5px;line-height:1.8;white-space:pre}
+.code.green{border-left-color:var(--green)}
+.code.cyan{border-left-color:var(--cyan)}
+.code.yellow{border-left-color:var(--yellow)}
+.code.red{border-left-color:var(--red)}
+.cp{color:var(--green)}
+.cc{color:var(--t3)}
+.cf{color:var(--yellow)}
+.ch{color:var(--cyan)}
+.cx{color:var(--purple)}
+.cr{color:var(--red)}
+.co{color:var(--orange)}
+.ct2{color:var(--t1)}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:10.5px}
+th{font-family:var(--head);font-size:11px;font-weight:700;padding:5px 9px;
+  text-align:left;letter-spacing:1px;background:var(--s3);color:var(--t1)}
+td{padding:4px 9px;border-top:1px solid var(--b1);vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+.vg{color:var(--green)}.vw{color:var(--orange)}.vb{color:var(--red)}
+.vc{color:var(--cyan)}.vn{color:var(--t2)}.vy{color:var(--yellow)}
+
+/* ANATOMY */
+.ana{display:flex;align-items:stretch;gap:0;margin:6px 0;font-family:var(--mono);font-size:10px;flex-wrap:wrap}
+.ap{padding:5px 9px;border:1px solid;text-align:center;min-width:50px}
+.al{display:block;font-size:7.5px;font-family:var(--body);text-transform:uppercase;
+  letter-spacing:.4px;margin-top:2px;opacity:.7}
+.as{display:flex;align-items:center;color:var(--t4);padding:0 1px;font-size:13px}
+
+/* MISC */
+.mono{font-family:var(--mono)}
+.t1{color:var(--t1)}.t2{color:var(--t2)}.t3{color:var(--t3)}
+.cyan{color:var(--cyan)}.green{color:var(--green)}.orange{color:var(--orange)}
+.yellow{color:var(--yellow)}.purple{color:var(--purple)}.red{color:var(--red)}
+.mt4{margin-top:4px}.mt6{margin-top:6px}.mt8{margin-top:8px}
+.small{font-size:9px}.bolder{color:var(--t1)}
+.tag{display:inline-block;font-family:var(--mono);font-size:8.5px;padding:1px 6px;
+  border-radius:2px;margin:1px 2px;border:1px solid;line-height:1.6}
+
+/* FLOW DIAGRAM (inbound/outbound) */
+.flow{display:flex;align-items:center;gap:6px;margin:6px 0;font-family:var(--mono);font-size:9.5px;flex-wrap:wrap}
+.fbox{padding:4px 10px;border:1px solid;text-align:center;font-size:9.5px}
+.farr{color:var(--t3);font-size:14px;flex-shrink:0}
+
+/* WILDCARD TABLE */
+.wc-row{display:flex;gap:8px;padding:2.5px 0;border-bottom:1px solid var(--b1);font-size:10px;align-items:center}
+.wc-k{font-family:var(--mono);color:var(--cyan);min-width:130px;font-size:9.5px}
+.wc-v{font-family:var(--mono);color:var(--t2);min-width:110px;font-size:9.5px}
+.wc-n{color:var(--t3);font-size:9px}
+
+/* SCENARIO BLOCKS */
+.sc{background:#020a12;border:1px solid var(--b1);padding:6px 10px;margin-top:5px}
+.sc-title{font-family:var(--head);font-size:10px;font-weight:700;letter-spacing:1px;
+  color:var(--t1);margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid var(--b1)}
+.sc-code{font-family:var(--mono);font-size:9px;line-height:1.7;white-space:pre}
+
+/* GOLDEN RULES */
+.rule{background:var(--s1);border:1px solid var(--b1);padding:8px 10px}
+.rule-num{font-family:var(--head);font-size:22px;font-weight:700;line-height:1;margin-bottom:4px}
+.rule-title{font-family:var(--head);font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:4px}
+.rule-body{font-size:10px;color:var(--t2);line-height:1.5}
+
+/* IMPLICIT DENY VISUALIZATION */
+.logic-vis{font-family:var(--mono);font-size:9.5px;line-height:1.8;margin-top:4px}
+.lv-match{color:var(--green)}.lv-nomatch{color:var(--t3)}.lv-deny{color:var(--red)}
+.lv-rule{display:flex;align-items:center;gap:8px;padding:2px 0}
+.lv-box{padding:2px 10px;border:1px solid;min-width:80px;text-align:center;font-size:9px}
+
+/* PRINT */
+@media print{
+  @page{size:594mm 841mm;margin:0}
+  html{margin:0;padding:0}
+  body{margin:0;padding:0;width:594mm;background:var(--bg)!important;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page{padding:6mm}
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <h1>ACL Cisco — Access Control Lists</h1>
+    <div class="sub">// Cheatsheet BTS CIEL · Filtrage, Déploiement Stratégique &amp; Diagnostic sur IOS</div>
+  </div>
+  <div class="badges">
+    <span class="badge bo">Standard · IDs 1–99 / 1300–1999</span>
+    <span class="badge bc">Étendue · IDs 100–199 / 2000–2699</span>
+    <span class="badge bg">Named ACL · ip access-list</span>
+    <span class="badge by">Cisco IOS · IPv4</span>
+  </div>
+</div>
+
+<!-- ROW 1: CONCEPT + INBOUND/OUTBOUND + LOGIQUE -->
+<div class="g3">
+
+  <!-- CONCEPT -->
+  <div class="card" style="border-top:2px solid var(--orange)">
+    <div class="ct"><span class="dot" style="background:var(--orange)"></span>CONCEPT FONDAMENTAL</div>
+    <div style="font-size:10.5px;margin-bottom:6px">
+      Une ACL est une <span class="t1">liste ordonnée de règles</span> configurée sur un
+      routeur Cisco pour <span class="orange">filtrer le trafic réseau</span>.<br>
+      Le routeur examine les en-têtes de chaque paquet et les compare
+      séquentiellement jusqu'à trouver une correspondance.
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+      <span class="tag" style="border-color:var(--orange2);color:var(--orange)">IP Source</span>
+      <span class="tag" style="border-color:var(--cyan2);color:var(--cyan)">IP Destination</span>
+      <span class="tag" style="border-color:var(--green2);color:var(--green)">Protocole</span>
+      <span class="tag" style="border-color:var(--yellow2);color:var(--yellow)">N° de Port</span>
+    </div>
+    <div class="mt6 t3 small mono">⚠ Une seule ACL par interface, par direction (in / out)<br>
+    ⚠ Les paquets générés par le routeur lui-même ne sont pas filtrés</div>
+  </div>
+
+  <!-- INBOUND / OUTBOUND -->
+  <div class="card" style="border-top:2px solid var(--cyan)">
+    <div class="ct"><span class="dot" style="background:var(--cyan)"></span>INBOUND vs OUTBOUND</div>
+    <div class="flow">
+      <div class="fbox" style="border-color:var(--b3);color:var(--t2)">Paquet<br>entrant</div>
+      <div class="farr">→</div>
+      <div class="fbox" style="border-color:var(--cyan2);color:var(--cyan)">ACL<br>INBOUND</div>
+      <div class="farr">→</div>
+      <div class="fbox" style="border-color:var(--b3);color:var(--t2)">Table de<br>routage</div>
+      <div class="farr">→</div>
+      <div class="fbox" style="border-color:var(--orange2);color:var(--orange)">ACL<br>OUTBOUND</div>
+      <div class="farr">→</div>
+      <div class="fbox" style="border-color:var(--b3);color:var(--t2)">Paquet<br>sortant</div>
+    </div>
+    <table class="mt4" style="font-size:9.5px">
+      <tr>
+        <th style="width:20%">Direction</th>
+        <th>Moment du filtrage</th>
+        <th>Avantage principal</th>
+      </tr>
+      <tr>
+        <td class="cyan mono">in</td>
+        <td>Avant la table de routage</td>
+        <td class="vg">Économie CPU : paquets détruits avant routage</td>
+      </tr>
+      <tr>
+        <td class="orange mono">out</td>
+        <td>Après routage, avant émission</td>
+        <td class="vn">Contrôle précis sur l'interface de sortie</td>
+      </tr>
+    </table>
+    <div class="mt4 t3 small mono">Commande d'application : <span class="mono t2">ip access-group [ID] {in|out}</span></div>
+  </div>
+
+  <!-- LOGIQUE SEQUENTIELLE -->
+  <div class="card" style="border-top:2px solid var(--green)">
+    <div class="ct"><span class="dot" style="background:var(--green)"></span>LOGIQUE SÉQUENTIELLE</div>
+    <div class="logic-vis">
+<div class="lv-rule"><div class="fbox lv-box" style="border-color:var(--b3)">Règle 10</div><span class="lv-nomatch">→ no match →</span></div>
+<div class="lv-rule"><div class="fbox lv-box" style="border-color:var(--b3)">Règle 20</div><span class="lv-nomatch">→ no match →</span></div>
+<div class="lv-rule"><div class="fbox lv-box" style="border-color:var(--green2);color:var(--green)">Règle 30</div><span class="lv-match">✓ MATCH → action exécutée</span></div>
+<div class="lv-rule" style="color:var(--t3);font-size:8.5px"><span style="margin-left:8px">Règle 40, 50... → ignorées</span></div>
+<div style="margin-top:4px;padding:3px 8px;border:1px solid var(--orange2);background:rgba(255,107,53,.06)">
+  <span class="red">⛔ Implicit Deny All</span>
+  <span class="t3 small"> — règle invisible · tout ce qui n'est pas explicitement autorisé est détruit</span>
+</div>
+    </div>
+    <div class="mt4 t3 small mono">
+      ▸ Incrémenter par 10 (10, 20, 30...) pour insérer des règles plus tard<br>
+      ▸ ACL nommée : <span class="t2">no [séquence]</span> pour supprimer une règle individuelle<br>
+      ▸ ACL numérotée : suppression globale uniquement (<span class="t2">no access-list [ID]</span>)
+    </div>
+  </div>
+</div>
+
+<!-- ROW 2: WILDCARD + STANDARD vs ETENDUE -->
+<div class="g2">
+
+  <!-- WILDCARD MASK -->
+  <div class="card">
+    <div class="ct"><span class="dot" style="background:var(--yellow)"></span>MASQUE GÉNÉRIQUE (WILDCARD MASK)</div>
+    <div style="font-size:10.5px;margin-bottom:6px">
+      Masque <span class="t1">inversé</span> du sous-réseau :
+      <span class="mono yellow">0</span> = bit <span class="t1">fixe</span> (doit correspondre) ·
+      <span class="mono orange">1</span> = bit <span class="t1">ignoré</span> (peut varier)
+    </div>
+
+    <div class="code yellow" style="margin-bottom:8px">  255.255.255.255
+<span class="cc">–</span> <span class="cf">255.255.255.0</span>   <span class="cc">(masque de sous-réseau classique)</span>
+<span style="color:var(--b3)">─────────────────────────────</span>
+= <span class="cf">0.0.0.255</span>       <span class="cc">(wildcard mask résultant)</span></div>
+
+    <div class="t1 small mono" style="margin-bottom:4px">Raccourcis IOS :</div>
+    <div class="code yellow">host 192.168.1.10  = 192.168.1.10 <span class="cf">0.0.0.0</span>  <span class="cc"># hôte unique</span>
+any               = 0.0.0.0 <span class="cf">255.255.255.255</span>          <span class="cc"># tous les hôtes</span></div>
+
+    <div class="t1 small mono" style="margin:6px 0 4px">Exemples de calcul :</div>
+    <div class="wc-row"><span class="wc-k">192.168.1.0/24</span><span class="wc-v">→ WC: <span class="yellow">0.0.0.255</span></span><span class="wc-n">dernier octet libre</span></div>
+    <div class="wc-row"><span class="wc-k">192.168.0.0/22</span><span class="wc-v">→ WC: <span class="yellow">0.0.3.255</span></span><span class="wc-n">4 réseaux /24 couverts</span></div>
+    <div class="wc-row"><span class="wc-k">10.0.0.0/8</span><span class="wc-v">→ WC: <span class="yellow">0.255.255.255</span></span><span class="wc-n">classe A entière</span></div>
+    <div class="wc-row"><span class="wc-k">172.16.0.0/12</span><span class="wc-v">→ WC: <span class="yellow">0.15.255.255</span></span><span class="wc-n">RFC 1918 classe B</span></div>
+    <div class="wc-row" style="border:none"><span class="wc-k">host 192.168.1.1</span><span class="wc-v">→ WC: <span class="yellow">0.0.0.0</span></span><span class="wc-n">hôte exact</span></div>
+  </div>
+
+  <!-- STANDARD vs ETENDUE -->
+  <div class="card">
+    <div class="ct"><span class="dot" style="background:var(--purple)"></span>STANDARD vs ÉTENDUE — MATRICE</div>
+    <table>
+      <tr>
+        <th style="width:28%">Caractéristique</th>
+        <th style="width:36%">ACL Standard</th>
+        <th style="width:36%">ACL Étendue</th>
+      </tr>
+      <tr>
+        <td class="t1">Identifiants</td>
+        <td class="vc mono">1–99 · 1300–1999</td>
+        <td class="vy mono">100–199 · 2000–2699</td>
+      </tr>
+      <tr>
+        <td class="t1">Critères filtrés</td>
+        <td class="vn">IP Source <span class="vb">uniquement</span></td>
+        <td class="vg">IP Src + IP Dst + Protocole + Port</td>
+      </tr>
+      <tr>
+        <td class="t1">Placement optimal</td>
+        <td class="vc">Au plus près de la <span class="t1">destination</span></td>
+        <td class="vy">Au plus près de la <span class="t1">source</span></td>
+      </tr>
+      <tr>
+        <td class="t1">Raison du placement</td>
+        <td class="vn">Ne filtre que la source → bloquerait vers toutes destinations si placée trop tôt</td>
+        <td class="vg">Précise → détruit le trafic dès l'origine, économise la bande passante</td>
+      </tr>
+      <tr>
+        <td class="t1">Cas d'usage idéal</td>
+        <td class="vn">Blocage global d'un hôte ou réseau · sécurisation VTY</td>
+        <td class="vg">Contrôle chirurgical de services (HTTP, SSH, BDD...)</td>
+      </tr>
+      <tr>
+        <td class="t1">Protocole ciblé</td>
+        <td class="vb">Non (ip implicite)</td>
+        <td class="vg">Oui : ip, tcp, udp, icmp, ospf...</td>
+      </tr>
+      <tr>
+        <td class="t1">Ports filtrés</td>
+        <td class="vb">Non</td>
+        <td class="vg">Oui : eq, gt, lt, neq, range</td>
+      </tr>
+      <tr>
+        <td class="t1">Complexité</td>
+        <td class="vg">Faible</td>
+        <td class="vw">Élevée</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- ROW 3: SYNTAXE STANDARD + SYNTAXE ETENDUE -->
+<div class="g2">
+
+  <!-- SYNTAXE STANDARD -->
+  <div class="card">
+    <div class="ct"><span class="dot" style="background:var(--cyan)"></span>SYNTAXE — ACL STANDARD</div>
+
+    <div class="t1 small mono" style="margin-bottom:5px">Anatomie ACL numérotée :</div>
+    <div class="ana">
+      <div class="ap" style="border-color:var(--b3);color:var(--t2)">access-list<span class="al">Commande</span></div>
+      <div class="as">·</div>
+      <div class="ap" style="border-color:var(--cyan2);color:var(--cyan)">1–99<span class="al">ID standard</span></div>
+      <div class="as">·</div>
+      <div class="ap" style="border-color:var(--red);color:var(--red)">deny<span class="al">Action</span></div>
+      <div class="as">·</div>
+      <div class="ap" style="border-color:var(--orange2);color:var(--orange)">192.168.1.0<span class="al">IP source</span></div>
+      <div class="as">·</div>
+      <div class="ap" style="border-color:var(--yellow2);color:var(--yellow)">0.0.0.255<span class="al">Wildcard</span></div>
+    </div>
+
+    <div class="code cyan mt4"><span class="cc"># Numérotée — syntaxe globale :</span>
+<span class="ct2">R1(config)#</span> <span class="ch">access-list</span> <span class="cf">10</span> <span class="cr">deny</span>   <span class="co">host 192.168.1.10</span>
+<span class="ct2">R1(config)#</span> <span class="ch">access-list</span> <span class="cf">10</span> <span class="cp">permit</span> <span class="co">any</span>
+
+<span class="cc"># Nommée — syntaxe recommandée :</span>
+<span class="ct2">R1(config)#</span> <span class="ch">ip access-list standard</span> <span class="cf">FILTRAGE_LAN</span>
+<span class="ct2">R1(config-std-nacl)#</span> <span class="cf">10</span> <span class="cr">deny</span>   <span class="co">host 192.168.1.10</span>
+<span class="ct2">R1(config-std-nacl)#</span> <span class="cf">20</span> <span class="cp">permit</span> <span class="co">any</span>
+
+<span class="cc"># Application sur interface :</span>
+<span class="ct2">R1(config)#</span> <span class="ch">interface</span> GigabitEthernet0/1
+<span class="ct2">R1(config-if)#</span> <span class="ch">ip access-group</span> <span class="cf">10</span> <span class="cy">out</span>
+
+<span class="cc"># Application sur lignes VTY (SSH/Telnet) :</span>
+<span class="ct2">R1(config)#</span> <span class="ch">line vty 0 4</span>
+<span class="ct2">R1(config-line)#</span> <span class="ch">access-class</span> <span class="cf">10</span> <span class="cy">in</span></div>
+  </div>
+
+  <!-- SYNTAXE ETENDUE -->
+  <div class="card">
+    <div class="ct"><span class="dot" style="background:var(--yellow)"></span>SYNTAXE — ACL ÉTENDUE</div>
+
+    <div class="t1 small mono" style="margin-bottom:5px">Anatomie ACL étendue (numérotée) :</div>
+    <div class="ana">
+      <div class="ap" style="border-color:var(--b3);color:var(--t2)">access-list<span class="al">Commande</span></div>
+      <div class="as">·</div>
+      <div class="ap" style="border-color:var(--yellow2);color:var(--yellow)">100<span class="al">ID étendu</span></div>
+      <div class="as">·</div>
+      <div class="ap" style="border-color:var(--green2);color:var(--green)">permit<span class="al">Action</span></div>
+      <div class="as">·</div>
+      <div class="ap" style="border-color:var(--purple2);color:var(--purple)">tcp<span class="al">Protocole</span></div>
+      <div class="as">·</div>
+      <div class="ap" style="border-color:var(--orange2);color:var(--orange)">src 0.0.0.255<span class="al">Src + WC</span></div>
+      <div class="as">·</div>
+      <div class="ap" style="border-color:var(--cyan2);color:var(--cyan)">host dst<span class="al">Dest + WC</span></div>
+      <div class="as">·</div>
+      <div class="ap" style="border-color:var(--b3);color:var(--t2)">eq 80<span class="al">Port</span></div>
+    </div>
+
+    <div class="code yellow mt4"><span class="cc"># Syntaxe complète :</span>
+<span class="ct2">R1(config)#</span> access-list <span class="cf">100</span> <span class="cp">permit</span> <span class="cx">tcp</span> <span class="co">192.168.1.0 0.0.0.255</span> <span class="ch">host 192.168.3.200</span> <span class="cf">eq 80</span>
+
+<span class="cc"># Protocoles : ip  tcp  udp  icmp  ospf  eigrp  gre  ahp  esp</span>
+<span class="cc"># Opérateurs de port :</span>
+<span class="cf">eq</span>  <span class="t3">port exact</span>       <span class="cc"># eq 80  eq 443  eq 22  eq 3306</span>
+<span class="cf">neq</span> <span class="t3">différent de</span>    <span class="cc"># neq 80</span>
+<span class="cf">gt</span>  <span class="t3">supérieur à</span>     <span class="cc"># gt 1023  (ports non-privilégiés)</span>
+<span class="cf">lt</span>  <span class="t3">inférieur à</span>     <span class="cc"># lt 1024  (ports privilégiés)</span>
+<span class="cf">range</span> <span class="t3">plage</span>        <span class="cc"># range 80 443</span>
+
+<span class="cc"># ICMP echo / echo-reply :</span>
+access-list 103 <span class="cr">deny</span> <span class="cx">icmp</span> <span class="co">any</span> <span class="ch">192.168.1.0 0.0.0.255</span> <span class="cf">echo</span>
+
+<span class="cc"># TCP established (autoriser réponses) :</span>
+access-list 110 <span class="cp">permit</span> <span class="cx">tcp</span> <span class="co">any any</span> <span class="cf">established</span>
+
+<span class="cc"># Nommée étendue :</span>
+<span class="ch">ip access-list extended</span> <span class="cf">DMZ_PROTECT</span>
+  <span class="cf">10</span> <span class="cp">permit</span> <span class="cx">tcp</span> <span class="co">any</span> <span class="ch">192.168.3.0 0.0.0.255</span> <span class="cf">eq 80</span>
+  <span class="cf">20</span> <span class="cp">permit</span> <span class="cx">tcp</span> <span class="co">any</span> <span class="ch">192.168.3.0 0.0.0.255</span> <span class="cf">eq 443</span>
+  <span class="cf">30</span> <span class="cr">deny</span>   <span class="cx">ip</span>  <span class="co">any</span> <span class="ch">192.168.3.0 0.0.0.255</span>
+  <span class="cf">40</span> <span class="cp">permit</span> <span class="cx">ip</span>  <span class="co">any any</span></div>
+  </div>
+</div>
+
+<!-- ROW 4: SCENARIOS STANDARD -->
+<div class="card">
+  <div class="ct"><span class="dot" style="background:var(--cyan)"></span>SCÉNARIOS — ACL STANDARD · (IDs 1–99) · placement au plus près de la DESTINATION</div>
+  <div class="g4">
+
+    <div>
+      <div class="sc-title cyan">Cas 1 — Bloquer un hôte spécifique</div>
+      <div class="small t3" style="margin-bottom:3px">PC1 (192.168.1.10) isolé du réseau distant</div>
+      <div class="sc"><div class="sc-code"><span class="cc"># ACL</span>
+<span class="ch">access-list</span> <span class="cf">10</span> <span class="cr">deny</span>   <span class="co">host 192.168.1.10</span>
+<span class="ch">access-list</span> <span class="cf">10</span> <span class="cp">permit</span> <span class="co">any</span>
+
+<span class="cc"># Application</span>
+interface G0/1
+  <span class="ch">ip access-group</span> <span class="cf">10</span> <span class="cy">out</span></div></div>
+    </div>
+
+    <div>
+      <div class="sc-title cyan">Cas 2 — Autoriser uniquement un serveur</div>
+      <div class="small t3" style="margin-bottom:3px">Seul 192.168.1.100 peut communiquer</div>
+      <div class="sc"><div class="sc-code"><span class="cc"># ACL</span>
+<span class="ch">access-list</span> <span class="cf">20</span> <span class="cp">permit</span> <span class="co">host 192.168.1.100</span>
+<span class="ch">access-list</span> <span class="cf">20</span> <span class="cr">deny</span>   <span class="co">any</span>
+
+<span class="cc"># Application</span>
+interface G0/1
+  <span class="ch">ip access-group</span> <span class="cf">20</span> <span class="cy">out</span></div></div>
+    </div>
+
+    <div>
+      <div class="sc-title cyan">Cas 3 — Préserver la bande passante</div>
+      <div class="small t3" style="margin-bottom:3px">Bloquer des hôtes dès l'entrée (inbound)</div>
+      <div class="sc"><div class="sc-code"><span class="cc"># ACL</span>
+<span class="ch">access-list</span> <span class="cf">40</span> <span class="cr">deny</span>   <span class="co">host 192.168.1.10</span>
+<span class="ch">access-list</span> <span class="cf">40</span> <span class="cr">deny</span>   <span class="co">host 192.168.1.11</span>
+<span class="ch">access-list</span> <span class="cf">40</span> <span class="cp">permit</span> <span class="co">any</span>
+
+<span class="cc"># Application (inbound !)</span>
+interface G0/0
+  <span class="ch">ip access-group</span> <span class="cf">40</span> <span class="cy">in</span></div></div>
+    </div>
+
+    <div>
+      <div class="sc-title cyan">Cas 4 — Sécuriser l'accès SSH (VTY)</div>
+      <div class="small t3" style="margin-bottom:3px">Seuls les admins 192.168.1.50/.51 via SSH</div>
+      <div class="sc"><div class="sc-code"><span class="cc"># ACL</span>
+<span class="ch">access-list</span> <span class="cf">30</span> <span class="cp">permit</span> <span class="co">host 192.168.1.50</span>
+<span class="ch">access-list</span> <span class="cf">30</span> <span class="cp">permit</span> <span class="co">host 192.168.1.51</span>
+<span class="ch">access-list</span> <span class="cf">30</span> <span class="cr">deny</span>   <span class="co">any</span>
+
+<span class="cc"># Application sur VTY !</span>
+line vty 0 4
+  <span class="ch">access-class</span> <span class="cf">30</span> <span class="cy">in</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ROW 5: SCENARIOS ETENDUS -->
+<div class="card">
+  <div class="ct"><span class="dot" style="background:var(--yellow)"></span>SCÉNARIOS — ACL ÉTENDUE · (IDs 100–199) · placement au plus près de la SOURCE</div>
+  <div class="g4">
+
+    <div>
+      <div class="sc-title yellow">Cas 1 — Bloquer HTTP (port 80)</div>
+      <div class="small t3" style="margin-bottom:3px">Empêcher 192.168.1.0/24 d'accéder au web</div>
+      <div class="sc"><div class="sc-code"><span class="ch">access-list</span> <span class="cf">101</span> <span class="cr">deny</span> <span class="cx">tcp</span>
+  <span class="co">192.168.1.0 0.0.0.255</span>
+  <span class="ch">any</span> <span class="cf">eq 80</span>
+<span class="ch">access-list</span> <span class="cf">101</span> <span class="cp">permit</span> <span class="cx">ip</span>
+  <span class="co">any any</span>
+
+interface G0/1
+  <span class="ch">ip access-group</span> <span class="cf">101</span> <span class="cy">in</span></div></div>
+    </div>
+
+    <div>
+      <div class="sc-title yellow">Cas 2 — Isolation MySQL (port 3306)</div>
+      <div class="small t3" style="margin-bottom:3px">Seul 192.168.1.100 accède à la BDD</div>
+      <div class="sc"><div class="sc-code"><span class="ch">access-list</span> <span class="cf">102</span> <span class="cp">permit</span> <span class="cx">tcp</span>
+  <span class="co">host 192.168.1.100</span>
+  <span class="ch">host 192.168.3.200</span> <span class="cf">eq 3306</span>
+<span class="ch">access-list</span> <span class="cf">102</span> <span class="cr">deny</span> <span class="cx">tcp</span>
+  <span class="co">any any</span> <span class="cf">eq 3306</span>
+
+interface G0/1
+  <span class="ch">ip access-group</span> <span class="cf">102</span> <span class="cy">in</span></div></div>
+    </div>
+
+    <div>
+      <div class="sc-title yellow">Cas 3 — Réseau invisible au Ping</div>
+      <div class="small t3" style="margin-bottom:3px">Bloquer ICMP echo depuis l'extérieur</div>
+      <div class="sc"><div class="sc-code"><span class="ch">access-list</span> <span class="cf">103</span> <span class="cr">deny</span> <span class="cx">icmp</span>
+  <span class="co">192.168.2.0 0.0.0.255</span>
+  <span class="ch">192.168.1.0 0.0.0.255</span>
+  <span class="cf">echo</span>
+<span class="ch">access-list</span> <span class="cf">103</span> <span class="cp">permit</span> <span class="cx">ip</span>
+  <span class="co">any any</span>
+
+interface G0/0
+  <span class="ch">ip access-group</span> <span class="cf">103</span> <span class="cy">in</span></div></div>
+    </div>
+
+    <div>
+      <div class="sc-title yellow">Cas 4 — SSH chirurgical (port 22)</div>
+      <div class="small t3" style="margin-bottom:3px">Admins SSH uniquement vers l'IP du routeur</div>
+      <div class="sc"><div class="sc-code"><span class="ch">access-list</span> <span class="cf">104</span> <span class="cp">permit</span> <span class="cx">tcp</span>
+  <span class="co">host 192.168.1.50</span>
+  <span class="ch">host 192.168.1.1</span> <span class="cf">eq 22</span>
+<span class="ch">access-list</span> <span class="cf">104</span> <span class="cp">permit</span> <span class="cx">tcp</span>
+  <span class="co">host 192.168.1.51</span>
+  <span class="ch">host 192.168.1.1</span> <span class="cf">eq 22</span>
+<span class="ch">access-list</span> <span class="cf">104</span> <span class="cr">deny</span> <span class="cx">ip</span>
+  <span class="co">any any</span></div></div>
+    </div>
+  </div>
+
+  <!-- DMZ SCENARIO -->
+  <div class="mt6">
+    <div class="sc-title" style="color:var(--purple);font-size:10px">Scénario avancé — Sécurisation stricte d'une DMZ (192.168.3.0/24) : HTTP et HTTPS publics, tout le reste bloqué</div>
+    <div class="sc mt4"><div class="sc-code"><span class="cc"># ACL 105 — Nommée étendue recommandée</span>
+<span class="ch">ip access-list extended</span> <span class="cf">DMZ_PUBLIC</span>
+  <span class="cf">10</span> <span class="cp">permit</span> <span class="cx">tcp</span> <span class="co">any</span> <span class="ch">192.168.3.0 0.0.0.255</span> <span class="cf">eq 80</span>      <span class="cc"># Autoriser HTTP</span>
+  <span class="cf">20</span> <span class="cp">permit</span> <span class="cx">tcp</span> <span class="co">any</span> <span class="ch">192.168.3.0 0.0.0.255</span> <span class="cf">eq 443</span>     <span class="cc"># Autoriser HTTPS</span>
+  <span class="cf">30</span> <span class="cr">deny</span>   <span class="cx">ip</span>  <span class="co">any</span> <span class="ch">192.168.3.0 0.0.0.255</span>              <span class="cc"># Bloquer tout autre trafic vers DMZ</span>
+  <span class="cf">40</span> <span class="cp">permit</span> <span class="cx">ip</span>  <span class="co">any any</span>                                  <span class="cc"># Maintenir la circulation globale</span>
+<span class="ct2">R1(config)#</span> interface G0/2
+<span class="ct2">R1(config-if)#</span> <span class="ch">ip access-group</span> <span class="cf">DMZ_PUBLIC</span> <span class="cy">in</span></div></div>
+  </div>
+</div>
+
+<!-- ROW 6: REGLES D'OR + DIAGNOSTIC -->
+<div class="g2">
+
+  <!-- 4 REGLES D'OR -->
+  <div class="card">
+    <div class="ct"><span class="dot" style="background:var(--orange)"></span>L'ARCHITECTURE IMPECCABLE — 4 RÈGLES D'OR</div>
+    <div class="g2" style="gap:6px">
+      <div class="rule" style="border-top:2px solid var(--green)">
+        <div class="rule-num green">01</div>
+        <div class="rule-title green">Spécifique Avant Général</div>
+        <div class="rule-body">First match : placer toujours les règles ciblées <span class="t1">avant</span> les règles larges (permit any, deny any). Une règle générale en tête court-circuite tout le reste.</div>
+        <div class="code green" style="margin-top:5px;font-size:8.5px"><span class="cr">deny</span>   host 192.168.1.10  <span class="cc">← spécifique</span>
+<span class="cp">permit</span> any              <span class="cc">← général</span></div>
+      </div>
+      <div class="rule" style="border-top:2px solid var(--red)">
+        <div class="rule-num red">02</div>
+        <div class="rule-title red">L'Implicite est Fatal</div>
+        <div class="rule-body">Toute ACL se termine par un <span class="red mono">deny any</span> invisible. Si vous oubliez le <span class="t1">permit any</span> final (ou les règles nécessaires), tout le trafic résiduel est détruit silencieusement.</div>
+        <div class="code red" style="margin-top:5px;font-size:8.5px"><span class="cr">deny</span> host 10.0.0.1
+<span class="cp">permit</span> any          <span class="cc">← porte de secours !</span>
+<span class="cc">! implicit deny all ←invisible</span></div>
+      </div>
+      <div class="rule" style="border-top:2px solid var(--cyan)">
+        <div class="rule-num cyan">03</div>
+        <div class="rule-title cyan">La Loi du Placement</div>
+        <div class="rule-body">
+          <span class="cyan">Standard</span> → au plus près de la <span class="t1">destination</span> : filtre uniquement la source, évite les dommages collatéraux.<br>
+          <span class="yellow">Étendue</span> → au plus près de la <span class="t1">source</span> : détruit le trafic dès l'origine, préserve la bande passante.
+        </div>
+      </div>
+      <div class="rule" style="border-top:2px solid var(--yellow)">
+        <div class="rule-num yellow">04</div>
+        <div class="rule-title yellow">La Porte de Secours</div>
+        <div class="rule-body">Ajoutez systématiquement <span class="t1 mono">permit ip any any</span> en fin d'ACL étendue si vous ne souhaitez pas isoler complètement l'infrastructure. Testez toujours avec <span class="mono cyan">show access-lists</span> avant et après.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAGNOSTIC -->
+  <div class="card">
+    <div class="ct"><span class="dot" style="background:var(--green)"></span>COMMANDES DE DIAGNOSTIC &amp; GESTION</div>
+    <div class="code green"><span class="cc"># Voir toutes les ACL et leurs compteurs</span>
+<span class="ct2">R1#</span> <span class="cp">show access-lists</span>
+<span class="ct2">R1#</span> <span class="cp">show ip access-lists</span>          <span class="cc"># IPv4 uniquement</span>
+
+<span class="cc"># Vérifier les ACL appliquées sur une interface</span>
+<span class="ct2">R1#</span> <span class="cp">show ip interface</span> GigabitEthernet0/1
+<span class="ct2">R1#</span> <span class="cp">show running-config</span> | include access
+
+<span class="cc"># Remettre les compteurs de hit à zéro</span>
+<span class="ct2">R1#</span> <span class="cp">clear ip access-list counters</span> <span class="cf">100</span>
+
+<span class="cc"># Supprimer une ACL numérotée entière</span>
+<span class="ct2">R1(config)#</span> <span class="cr">no access-list</span> <span class="cf">10</span>
+
+<span class="cc"># Supprimer une règle dans une ACL nommée</span>
+<span class="ct2">R1(config)#</span> ip access-list standard <span class="cf">MON_ACL</span>
+<span class="ct2">R1(config-std-nacl)#</span> <span class="cr">no 20</span>        <span class="cc"># supprime séquence 20</span>
+
+<span class="cc"># Retirer une ACL d'une interface</span>
+<span class="ct2">R1(config-if)#</span> <span class="cr">no ip access-group</span> <span class="cf">10</span> out
+
+<span class="cc"># Ajouter le mot-clé log pour monitoring</span>
+access-list 100 deny tcp any any eq 23 <span class="cf">log</span></div>
+
+    <div class="mt6">
+      <div class="t1 small mono" style="margin-bottom:5px">Ports bien connus (TCP sauf mention) :</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
+        <div class="wc-row"><span class="wc-k mono yellow">eq 22</span><span class="wc-n">SSH</span></div>
+        <div class="wc-row"><span class="wc-k mono yellow">eq 23</span><span class="wc-n">Telnet</span></div>
+        <div class="wc-row"><span class="wc-k mono yellow">eq 80</span><span class="wc-n">HTTP</span></div>
+        <div class="wc-row"><span class="wc-k mono yellow">eq 443</span><span class="wc-n">HTTPS</span></div>
+        <div class="wc-row"><span class="wc-k mono yellow">eq 21</span><span class="wc-n">FTP control</span></div>
+        <div class="wc-row"><span class="wc-k mono yellow">eq 20</span><span class="wc-n">FTP data</span></div>
+        <div class="wc-row"><span class="wc-k mono yellow">eq 25</span><span class="wc-n">SMTP</span></div>
+        <div class="wc-row"><span class="wc-k mono yellow">eq 53</span><span class="wc-n">DNS (TCP+UDP)</span></div>
+        <div class="wc-row"><span class="wc-k mono yellow">eq 67/68</span><span class="wc-n">DHCP (UDP)</span></div>
+        <div class="wc-row"><span class="wc-k mono yellow">eq 3306</span><span class="wc-n">MySQL</span></div>
+        <div class="wc-row"><span class="wc-k mono yellow">eq 1433</span><span class="wc-n">MSSQL</span></div>
+        <div class="wc-row" style="border:none"><span class="wc-k mono yellow">eq 5432</span><span class="wc-n">PostgreSQL</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div style="text-align:center;font-family:var(--mono);font-size:8.5px;color:var(--t3);
+  border-top:1px solid var(--b1);padding-top:6px">
+  ACL Cisco Cheatsheet · BTS CIEL · Lycée Newton-ENREA · Sources : Cisco IOS Documentation, Cisco Networking Academy
+  &nbsp;·&nbsp; btscielnewton.eu
+</div>
+
+</div>
+</body>
+</html>
